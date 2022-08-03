@@ -1,0 +1,24 @@
+{
+  "name": "backchess",
+  "version": "1.0.0",
+  "description": "Backend for LogiChess, made with Express and Socket.io",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yosuanicolaus/backchess.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yosuanicolaus/backchess/issues"
+  },
+  "homepage": "https://github.com/yosuanicolaus/backchess#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "socket.io": "^4.5.1"
+  }
+}
