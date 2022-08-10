@@ -1,7 +1,7 @@
 require("dotenv").config();
+const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const Chess = require("./logichess/index");
 const Game = require("./models/Game");
-const TestChess = require("./models/TestChess");
 const express = require("express");
 const app = express();
 app.use(express.json());
@@ -28,46 +28,25 @@ app.get("/", async (req, res) => {
   res.json(games);
 });
 
-app.post("/", (req, res) => {
-  console.log("post /");
-  console.log("params:", req.params);
-  console.log("body:", req.body);
-  const game = new Chess(req.body.fen);
-  res.json(game.board.board);
-});
-
-app.post("/new/game", async (req, res) => {
-  console.log("post /new/game");
-  let { fen, pgn } = req.body;
-
-  if (!fen) {
-    return res.status(400).json({ message: "{fen} is required!" });
-  }
-  if (!pgn) {
-    pgn = "";
-  }
-
+app.post("/game/new", async (req, res) => {
+  console.log("post /game/new");
+  const { fen = defaultFen, pgn = "", history = [] } = req.body;
   const game = new Game({
-    fen: fen,
-    pgn: pgn,
+    fen,
+    pgn,
+    history,
   });
   await game.save();
   res.json(game);
 });
 
-app.post("/test", async (req, res) => {
-  let { fen } = req.body;
-  if (!fen) return res.status(400).json("pls include {fen}");
-
-  const chess = new Chess(fen);
-  const game = new TestChess({
-    chess: chess,
-  });
-  game.save();
-  res.json(game);
-});
-
-app.get("/test", async (req, res) => {
-  const games = await TestChess.find();
-  res.json(games);
+app.get("/game/:id/moves", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const game = await Game.findById(id);
+    const chess = new Chess(game.fen);
+    res.json(chess.getMoves());
+  } catch (error) {
+    return res.status(400).json("game id not found!");
+  }
 });
