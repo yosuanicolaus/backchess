@@ -1,5 +1,5 @@
 require("dotenv").config();
-const Chess = require("./logichess/main");
+const Chess = require("./logichess/index");
 const express = require("express");
 const app = express();
 app.use(express.json());
@@ -11,7 +11,7 @@ mongoose
   .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     app.listen(3001, () => {
-      console.log("server listening on port 3001!");
+      console.log("server listening on port 3001");
     });
   })
   .catch((err) => {
