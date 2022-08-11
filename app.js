@@ -20,16 +20,15 @@ mongoose
     console.log(err);
   });
 
+// returns all games in db
 app.get("/", async (req, res) => {
-  console.log("get /");
-  console.log("params:", req.params);
-  console.log("body:", req.body);
   const games = await Game.find();
-  res.json(games);
+  res.json({ games });
 });
 
+// create and store new game
+// req.body {fen, pgn, history} is optional
 app.post("/game/new", async (req, res) => {
-  console.log("post /game/new");
   const { fen = defaultFen, pgn = "", history = [] } = req.body;
   const game = new Game({
     fen,
@@ -37,16 +36,50 @@ app.post("/game/new", async (req, res) => {
     history,
   });
   await game.save();
-  res.json(game);
+  res.json({ game });
 });
 
+// get game from database
+app.get("/game/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const game = await Game.findById(id);
+    res.json({ game });
+  } catch (error) {
+    return res.status(400).json("game id not found!");
+  }
+});
+
+// get possible moves in a game
 app.get("/game/:id/moves", async (req, res) => {
   const { id } = req.params;
   try {
     const game = await Game.findById(id);
     const chess = new Chess(game.fen);
-    res.json(chess.getMoves());
+    const moves = chess.getMoves();
+    res.json({ moves });
   } catch (error) {
     return res.status(400).json("game id not found!");
+  }
+});
+
+// make a move in game
+app.post("/game/:id/move", async (req, res) => {
+  const { id } = req.params;
+  const { move } = req.body;
+  if (!move) {
+    return res.status(400).json("add {move} to request body");
+  }
+  try {
+    const game = await Game.findById(id);
+    const chess = new Chess(game.fen);
+    chess.play(move);
+    const moves = chess.getMoves();
+    game.fen = chess.fen.fen;
+    game.history.push(move.san);
+    game.save();
+    res.json({ game, moves });
+  } catch (error) {
+    return res.status(400).json("can't find game with that id");
   }
 });
