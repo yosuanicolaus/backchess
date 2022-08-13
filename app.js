@@ -3,8 +3,10 @@ const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const Chess = require("./logichess/index");
 const Game = require("./models/Game");
 const express = require("express");
+const cors = require("cors");
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // setup mongoose connection
 const mongoose = require("mongoose");
@@ -82,4 +84,10 @@ app.post("/game/:id/move", async (req, res) => {
   } catch (error) {
     return res.status(400).json("can't find game with that id");
   }
+});
+
+app.get("/test", (req, res) => {
+  console.log("test activated");
+
+  res.json({ 0: "test" });
 });
