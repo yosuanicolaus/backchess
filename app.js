@@ -2,11 +2,13 @@ require("dotenv").config();
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const Chess = require("./logichess/index");
 const Game = require("./models/Game");
+const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const app = express();
 app.use(express.json());
 app.use(cors());
+const server = http.createServer(app);
 
 // setup mongoose connection
 const mongoose = require("mongoose");
@@ -14,7 +16,7 @@ const uri = process.env.MONGO_URI;
 mongoose
   .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    app.listen(3001, () => {
+    server.listen(3001, () => {
       console.log("server listening on port 3001");
     });
   })
