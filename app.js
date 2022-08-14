@@ -5,10 +5,12 @@ const Game = require("./models/Game");
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
+const { Server } = require("socket.io");
 const app = express();
 app.use(express.json());
 app.use(cors());
 const server = http.createServer(app);
+const io = new Server(server);
 
 // setup mongoose connection
 const mongoose = require("mongoose");
@@ -23,6 +25,10 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+io.on("connection", () => {
+  console.log("a user just connected");
+});
 
 // returns all games in db
 app.get("/", async (req, res) => {
