@@ -83,8 +83,51 @@ app.post("/game/:id/join", async (req, res) => {
       return res.status(403).json("can't join, room is full");
     } else {
       game.user1 = username;
-      game.state = "playing";
     }
+    await game.save();
+    res.json({ game });
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+});
+
+// leave game
+app.post("/game/:id/leave", async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json("please include {username} in req body");
+  }
+  try {
+    const game = await Game.findById(id);
+    if (!game) {
+      return res.status(400).json("can't find game with that id");
+    }
+
+    if (username === game.user0) {
+      game.user0 = null;
+    } else if (username === game.user1) {
+      game.user1 = null;
+    } else {
+      return res.status(400).json("can't find user in this game");
+    }
+
+    if (!game.user1 && !game.user0) {
+      // room empty, delete game
+      await game.delete();
+      return res.json(`empty room, game ${id} deleted`);
+    }
+
+    if (!game.user0 && game.user1) {
+      game.user0 = game.user1;
+      game.user1 = null;
+    }
+
+    if (game.state === "playing") {
+      // end game
+      game.state = "end";
+    }
+
     await game.save();
     res.json({ game });
   } catch (error) {
