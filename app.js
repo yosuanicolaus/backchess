@@ -44,13 +44,19 @@ app.get("/", async (req, res) => {
 // create and store new game
 // req.body {fen, pgn, history} is optional
 app.post("/game/new", async (req, res) => {
-  const { fen = defaultFen, history = [], username } = req.body;
+  const {
+    fen = defaultFen,
+    history = [],
+    timeControl = "10+0",
+    username,
+  } = req.body;
   if (!username) {
     return res.status(400).json("please include {username} in req body");
   }
   const game = new Game({
     fen,
     history,
+    timeControl,
     pgn: createPgn(history),
     user0: username,
     state: "pending",

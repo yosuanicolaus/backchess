@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@gameID = 62fa6b6f68cf9dd078940cff
+@gameID = 62fa70c211ea3115410c4d6b
 
 ### get all games from database
 GET {{host}}/ HTTP/1.1
@@ -9,7 +9,7 @@ POST {{host}}/game/new/ HTTP/1.1
 content-type: application/json
 
 {
-    "username": "asdf404"
+    "username": "foo"
 }
 
 ### get game info with ID
@@ -20,7 +20,7 @@ POST {{host}}/game/{{gameID}}/join HTTP/1.1
 content-type: application/json
 
 {
-    "username": "qwer"
+    "username": "bar"
 }
 
 ### leave game
@@ -28,5 +28,5 @@ POST {{host}}/game/{{gameID}}/leave HTTP/1.1
 content-type: application/json
 
 {
-    "username": "asdf404"
+    "username": "bar"
 }
