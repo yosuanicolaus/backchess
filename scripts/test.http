@@ -1,0 +1,16 @@
+@host = http://localhost:3001
+@gameID = 62fa10089e7b9d70e4e4e2ac
+
+### get all games from database
+GET {{host}}/ HTTP/1.1
+
+### create new game
+POST {{host}}/game/new/ HTTP/1.1
+
+Content-Type: application/json
+{
+    "username": "johndoe1995"
+}
+
+### get game info with ID
+GET {{host}}/game/{{gameID}}/ HTTP/1.1
