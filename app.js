@@ -44,7 +44,6 @@ app.get("/", async (req, res) => {
 // create and store new game
 // req.body {fen, pgn, history} is optional
 app.post("/game/new", async (req, res) => {
-  console.log(req.body);
   const { fen = defaultFen, history = [], username } = req.body;
   if (!username) {
     return res.status(400).json("please include {username} in req body");
@@ -54,6 +53,7 @@ app.post("/game/new", async (req, res) => {
     history,
     pgn: createPgn(history),
     user0: username,
+    state: "pending",
   });
   await game.save();
   res.json({ game });
@@ -66,9 +66,34 @@ app.get("/game/:id", async (req, res) => {
     const game = await Game.findById(id);
     res.json({ game });
   } catch (error) {
-    return res.status(400).json("game id not found!");
+    return res.status(400).json(error);
   }
 });
+
+// join game
+app.post("/game/:id/join", async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json("please include {username} in req body");
+  }
+  try {
+    const game = await Game.findById(id);
+    if (game?.user1) {
+      game.spectators.push(username);
+    } else {
+      game.user1 = username;
+      game.state = "playing";
+    }
+    await game.save();
+    res.json({ game });
+  } catch (error) {
+    return res.status(400).json(error);
+  }
+});
+
+/* both route below are going to be replaced with
+socket io realtime data connection
 
 // get possible moves in a game
 app.get("/game/:id/moves", async (req, res) => {
@@ -103,6 +128,8 @@ app.post("/game/:id/move", async (req, res) => {
     return res.status(400).json("can't find game with that id");
   }
 });
+
+*/
 
 app.get("/test", (req, res) => {
   console.log("test activated");
