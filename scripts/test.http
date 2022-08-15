@@ -1,15 +1,16 @@
 @host = http://localhost:3001
-@gameID = 62fa10089e7b9d70e4e4e2ac
+@gameID = 62fa26f9ce1e0eb6e4cc37ba
 
 ### get all games from database
 GET {{host}}/ HTTP/1.1
 
 ### create new game
 POST {{host}}/game/new/ HTTP/1.1
+content-type: application/json
 
-Content-Type: application/json
 {
-    "username": "johndoe1995"
+    "username": "johndoe1995",
+    "history": ["Nc3", "Nf6", "Nb1", "Ng8", "e4", "e5"]
 }
 
 ### get game info with ID

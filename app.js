@@ -4,6 +4,7 @@ const Chess = require("./logichess/index");
 const Game = require("./models/Game");
 const express = require("express");
 const cors = require("cors");
+const { createPgn } = require("./utils");
 
 const app = express();
 app.use(express.json());
@@ -43,11 +44,16 @@ app.get("/", async (req, res) => {
 // create and store new game
 // req.body {fen, pgn, history} is optional
 app.post("/game/new", async (req, res) => {
-  const { fen = defaultFen, pgn = "", history = [] } = req.body;
+  console.log(req.body);
+  const { fen = defaultFen, history = [], username } = req.body;
+  if (!username) {
+    return res.status(400).json("please include {username} in req body");
+  }
   const game = new Game({
     fen,
-    pgn,
     history,
+    pgn: createPgn(history),
+    user0: username,
   });
   await game.save();
   res.json({ game });
