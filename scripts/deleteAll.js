@@ -7,10 +7,8 @@ console.log(uri);
 mongoose
   .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    // delete all game with no history
-
-    Game.deleteMany({ history: [] }).then(() => {
-      console.log("deleted games");
+    Game.deleteMany().then(() => {
+      console.log("deleted all games");
     });
   })
   .catch((err) => {
