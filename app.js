@@ -80,7 +80,7 @@ app.post("/game/:id/join", async (req, res) => {
   try {
     const game = await Game.findById(id);
     if (game?.user1) {
-      game.spectators.push(username);
+      return res.status(403).json("can't join, room is full");
     } else {
       game.user1 = username;
       game.state = "playing";

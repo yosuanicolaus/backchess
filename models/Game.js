@@ -9,7 +9,6 @@ const gameSchema = mongoose.Schema({
   pblack: String,
   user0: String,
   user1: String,
-  spectators: [String],
 });
 
 module.exports = mongoose.model("Game", gameSchema);
