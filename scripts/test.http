@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@gameID = 62fba75da5e780f3ddf05138
+@gameID = 62fbad094c218d1a5d6b7c17
 
 ### get all games from database
 GET {{host}}/ HTTP/1.1
@@ -9,12 +9,15 @@ POST {{host}}/game/new/ HTTP/1.1
 content-type: application/json
 
 {
-    "username": "qwer",
-    "timeControl": "4+7"
+    "username": "asdf",
+    "timeControl": "8+7"
 }
 
 ### get game info with ID
 GET {{host}}/game/{{gameID}}/ HTTP/1.1
+
+### get random joinable game
+GET {{host}}/game/random/open/ HTTP/1.1
 
 ### join game
 POST {{host}}/game/{{gameID}}/join HTTP/1.1

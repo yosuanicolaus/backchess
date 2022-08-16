@@ -54,6 +54,25 @@ app.get("/game/:id", (req, res) => {
     });
 });
 
+// get random joinable game
+app.get("/game/random/open", (req, res) => {
+  const query = { user1: null, state: "pending" };
+  Game.countDocuments(query, (error, total) => {
+    if (error) {
+      return res.json(error.message);
+    }
+    const randIdx = Math.floor(Math.random() * total);
+    Game.findOne(query)
+      .skip(randIdx)
+      .exec((error, result) => {
+        if (error) {
+          return res.json(error.message);
+        }
+        res.json(result);
+      });
+  });
+});
+
 // join game, mandatory {username}
 app.post("/game/:id/join", (req, res) => {
   const { id } = req.params;
