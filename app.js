@@ -1,6 +1,5 @@
 require("dotenv").config();
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const Chess = require("./logichess/index");
 const Game = require("./models/Game");
 const express = require("express");
 const cors = require("cors");
@@ -10,31 +9,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const server = require("http").createServer(app);
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
-});
-
-// setup mongoose connection
-const mongoose = require("mongoose");
-const uri = process.env.MONGO_URI;
-mongoose
-  .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    server.listen(3001, () => {
-      console.log("server listening on port 3001");
-    });
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-io.on("connection", () => {
-  console.log("a user just connected");
-});
-
 // returns all games in db
 app.get("/", async (req, res) => {
   const games = await Game.find();
@@ -42,7 +16,7 @@ app.get("/", async (req, res) => {
 });
 
 // create and store new game
-// req.body {fen, pgn, history} is optional
+// req.body { username } is mandatory
 app.post("/game/new", async (req, res) => {
   const {
     fen = defaultFen,
@@ -185,3 +159,5 @@ app.get("/test", (req, res) => {
 
   res.json({ 0: "test" });
 });
+
+module.exports = app;
