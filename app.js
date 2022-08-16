@@ -24,15 +24,17 @@ app.post("/game/new", async (req, res) => {
     timeControl = "10+0",
     username,
   } = req.body;
-  if (!username) {
-    return res.status(400).json("please include {username} in req body");
-  }
+  if (!username) return res.status(400).json("include {username} in req body");
+
   const game = new Game({
     fen,
     history,
     timeControl,
     pgn: createPgn(history),
     user0: username,
+    user1: null,
+    pwhite: null,
+    pblack: null,
     state: "pending",
   });
   await game.save();
@@ -40,79 +42,73 @@ app.post("/game/new", async (req, res) => {
 });
 
 // get game from database
-app.get("/game/:id", async (req, res) => {
+app.get("/game/:id", (req, res) => {
   const { id } = req.params;
-  try {
-    const game = await Game.findById(id);
-    res.json({ game });
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+  Game.findById(id)
+    .then((game) => {
+      if (!game) return res.status(404).json("game not found");
+      res.json({ game });
+    })
+    .catch(() => {
+      res.status(404).json("game not found");
+    });
 });
 
-// join game
-app.post("/game/:id/join", async (req, res) => {
+// join game, mandatory {username}
+app.post("/game/:id/join", (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
-  if (!username) {
-    return res.status(400).json("please include {username} in req body");
-  }
-  try {
-    const game = await Game.findById(id);
-    if (game?.user1) {
-      return res.status(403).json("can't join, room is full");
-    } else {
+  if (!username) return res.status(400).json("include {username} in req body");
+
+  Game.findById(id)
+    .then((game) => {
+      if (!game) return res.status(404).json("game not found");
+      if (game?.user1) return res.status(403).json("can't join, room is full");
       game.user1 = username;
-    }
-    await game.save();
-    res.json({ game });
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+      game.save().then(() => res.json({ game }));
+    })
+    .catch(() => {
+      res.status(404).json("game not found");
+    });
 });
 
 // leave game
 app.post("/game/:id/leave", async (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
-  if (!username) {
-    return res.status(400).json("please include {username} in req body");
-  }
-  try {
-    const game = await Game.findById(id);
-    if (!game) {
-      return res.status(400).json("can't find game with that id");
-    }
+  if (!username) return res.status(400).json("include {username} in req body");
 
-    if (username === game.user0) {
-      game.user0 = null;
-    } else if (username === game.user1) {
-      game.user1 = null;
-    } else {
-      return res.status(400).json("can't find user in this game");
-    }
+  Game.findById(id)
+    .then((game) => {
+      if (!game) return res.status(404).json("game not found");
 
-    if (!game.user1 && !game.user0) {
-      // room empty, delete game
-      await game.delete();
-      return res.json(`empty room, game ${id} deleted`);
-    }
+      if (username === game.user0) {
+        game.user0 = null;
+      } else if (username === game.user1) {
+        game.user1 = null;
+      } else {
+        return res.status(400).json("can't find that user in this game");
+      }
 
-    if (!game.user0 && game.user1) {
-      game.user0 = game.user1;
-      game.user1 = null;
-    }
+      let emptyFlag = false;
+      if (!game.user0 && !game.user1) {
+        emptyFlag = true;
+        game.delete().then(() => {
+          res.json(`empty room, game ${id} deleted`);
+        });
+      }
+      if (emptyFlag) return;
 
-    if (game.state === "playing") {
-      // end game
-      game.state = "end";
-    }
+      if (!game.user0 && game.user1) {
+        game.user0 = game.user1;
+        game.user1 = null;
+      }
 
-    await game.save();
-    res.json({ game });
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+      game.save().then(() => res.json(game));
+    })
+    .catch(() => {
+      res.status(404).json("game not found");
+    });
 });
 
 /* both route below are going to be replaced with
