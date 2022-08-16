@@ -11,10 +11,10 @@ const io = require("socket.io")(server, {
 io.on("connection", (socket) => {
   console.log("a user just connected");
 
-  socket.on("test", (data) => {
-    console.log("test received!");
-    console.log(data);
-    io.emit("test", data);
+  socket.on("join", async (gameID) => {
+    socket.join(gameID);
+    const game = await Game.findById(gameID);
+    io.to(gameID).emit("update-game", game);
   });
 
   socket.on("disconnect", () => {
