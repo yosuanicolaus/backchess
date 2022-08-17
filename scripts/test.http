@@ -1,7 +1,7 @@
 @host = http://localhost:3001
 @gameID = 62fc3e0ff9c41ca7bea862d5
 
-### get all games from database
+### get all games & users from database (for testing only)
 GET {{host}}/ HTTP/1.1
 
 ### create new game
@@ -9,7 +9,7 @@ POST {{host}}/game/new/ HTTP/1.1
 content-type: application/json
 
 {
-    "username": "bar"
+    "user": {"name": "johndoe", "uid": "asdfqwer1234"}
 }
 
 ### get game info with ID
@@ -34,5 +34,22 @@ content-type: application/json
     "username": "bar"
 }
 
-### custom test
+### / test
 GET {{host}}/test HTTP/1.1
+
+### /game test
+GET {{host}}/game/test HTTP/1.1
+
+### /user test
+GET {{host}}/user/test HTTP/1.1
+
+### create new user
+POST {{host}}/user/new HTTP/1.1
+content-type: application/json
+
+{
+    "user": {
+        "name": "gooduid",
+        "uid": "1CNwvn2IS9eb9DPVV7esEBDhtW02"
+    }
+}

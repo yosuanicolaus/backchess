@@ -2,6 +2,11 @@ const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const Game = require("../models/Game");
 const express = require("express");
 const router = express.Router();
+const { createPgn } = require("../utils");
+
+router.get("/test", (req, res) => {
+  res.json({ test: "/game test successful" });
+});
 
 // create and store new game
 // req.body must have { user } in it

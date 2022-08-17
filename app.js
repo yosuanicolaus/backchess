@@ -6,7 +6,6 @@ const userRouter = require("./routes/user");
 
 const express = require("express");
 const cors = require("cors");
-// const { createPgn, createUser } = require("./utils");
 
 const app = express();
 app.use(express.json());

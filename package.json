@@ -9,7 +9,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yosuanicolaus/backchess.git"
+    "url": "git+https://github.com/yosuanicolaus/backchess.git",
+    "deleteAll": "node scripts/deleteAll.js"
   },
   "keywords": [],
   "author": "",
