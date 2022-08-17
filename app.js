@@ -35,7 +35,7 @@ app.post("/game/new", async (req, res) => {
     user1: null,
     pwhite: null,
     pblack: null,
-    state: "pending",
+    state: "waiting",
   });
   await game.save();
   res.json({ game });
@@ -56,7 +56,7 @@ app.get("/game/:id", (req, res) => {
 
 // get random joinable game
 app.get("/game/random/open", (req, res) => {
-  const query = { user1: null, state: "pending" };
+  const query = { state: "waiting" };
   Game.countDocuments(query, (error, total) => {
     if (error) {
       return res.json(error.message);
@@ -64,11 +64,12 @@ app.get("/game/random/open", (req, res) => {
     const randIdx = Math.floor(Math.random() * total);
     Game.findOne(query)
       .skip(randIdx)
-      .exec((error, result) => {
-        if (error) {
-          return res.json(error.message);
-        }
-        res.json(result);
+      .exec((error, game) => {
+        if (error) return res.status(400).json(error.message);
+        if (!game)
+          return res.status(404).json("There is no open game at the moment");
+
+        res.json({ game });
       });
   });
 });
@@ -84,6 +85,7 @@ app.post("/game/:id/join", (req, res) => {
       if (!game) return res.status(404).json("game not found");
       if (game?.user1) return res.status(403).json("can't join, room is full");
       game.user1 = username;
+      game.state = "pending";
       game.save().then(() => res.json({ game }));
     })
     .catch(() => {
@@ -123,6 +125,7 @@ app.post("/game/:id/leave", async (req, res) => {
         game.user1 = null;
       }
 
+      game.state = "waiting";
       game.save().then(() => res.json(game));
     })
     .catch(() => {
