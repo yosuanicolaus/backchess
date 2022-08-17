@@ -1,22 +1,24 @@
 require("dotenv").config();
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const Game = require("./models/Game");
+const User = require("./models/User");
 const express = require("express");
 const cors = require("cors");
-const { createPgn } = require("./utils");
+const { createPgn, createUser } = require("./utils");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// returns all games in db
+// returns all games and users in db
 app.get("/", async (req, res) => {
   const games = await Game.find();
-  res.json({ games });
+  const users = await User.find();
+  res.json({ games, users });
 });
 
 // create and store new game
-// req.body { username } is mandatory
+// req.body must have { user } in it
 app.post("/game/new", async (req, res) => {
   const {
     fen = defaultFen,
@@ -24,21 +26,28 @@ app.post("/game/new", async (req, res) => {
     timeControl = "10+0",
     username,
   } = req.body;
-  if (!username) return res.status(400).json("include {username} in req body");
+  // TODO: Game model now store user0 & user1 as User model
+  // which requires {name, elo, uid, email}
+  // make changes accordingly
 
-  const game = new Game({
-    fen,
-    history,
-    timeControl,
-    pgn: createPgn(history),
-    user0: username,
-    user1: null,
-    pwhite: null,
-    pblack: null,
-    state: "waiting",
-  });
-  await game.save();
-  res.json({ game });
+  try {
+    const game = new Game({
+      fen,
+      history,
+      timeControl,
+      pgn: createPgn(history),
+      // TODO! get user from db to resolve this
+      // user0: createUser(user),
+      user1: null,
+      pwhite: null,
+      pblack: null,
+      state: "waiting",
+    });
+    await game.save();
+    res.json({ game });
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
 });
 
 // get game from database
@@ -79,6 +88,9 @@ app.post("/game/:id/join", (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
   if (!username) return res.status(400).json("include {username} in req body");
+  // TODO: Game model now store user0 & user1 as User model
+  // which requires {name, elo, uid, email}
+  // make changes accordingly
 
   Game.findById(id)
     .then((game) => {
@@ -98,6 +110,9 @@ app.post("/game/:id/leave", async (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
   if (!username) return res.status(400).json("include {username} in req body");
+  // TODO: Game model now store user0 & user1 as User model
+  // which requires {name, elo, uid, email}
+  // make changes accordingly
 
   Game.findById(id)
     .then((game) => {
