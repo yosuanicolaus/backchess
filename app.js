@@ -27,4 +27,6 @@ app.get("/test", (req, res) => {
 
 app.use("/game", gameRouter);
 
+app.use("/user", userRouter);
+
 module.exports = app;
