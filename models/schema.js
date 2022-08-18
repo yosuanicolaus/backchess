@@ -7,7 +7,6 @@ const userSchema = Schema(
     _id: String,
     uid: {
       type: String,
-      unique: true,
       required: true,
       minLength: 8,
     },
@@ -66,10 +65,7 @@ const gameSchema = Schema({
   user0: userSchema,
   user1: userSchema,
   chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-  _id: {
-    type: String,
-    default: generateID(),
-  },
+  _id: { type: String },
 });
 
 gameSchema.pre("save", function () {

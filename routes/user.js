@@ -27,7 +27,7 @@ router.get("/:uid", async (req, res) => {
 
   try {
     const user = await User.findById(uid);
-    if (!user) return res.status(404).json("user not found");
+    if (!user) throw "404/user not found";
     res.json(user);
   } catch (error) {
     handleError(error, res);
