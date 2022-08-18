@@ -1,43 +1,38 @@
-const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const User = require("../models/User");
+const Chat = require("../models/Chat");
+const Player = require("../models/Player");
 const Game = require("../models/Game");
+
 const express = require("express");
 const router = express.Router();
-const { createPgn } = require("../utils");
+const { generateID, handleError } = require("../utils");
 
 router.get("/test", (req, res) => {
   res.json({ test: "/game test successful" });
 });
 
 // create and store new game
-// req.body must have { user } in it
 router.post("/new", async (req, res) => {
-  const {
-    fen = defaultFen,
-    history = [],
-    timeControl = "10+0",
-    username,
-  } = req.body;
-  // TODO: Game model now store user0 & user1 as User model
-  // which requires {name, elo, uid, email}
-  // make changes accordingly
+  const { timeControl, uid } = req.body;
 
   try {
+    const user0 = await User.findById(uid);
+    if (!user0) throw "404/user not found";
+
+    const chat = new Chat();
+    await chat.save();
+
     const game = new Game({
-      fen,
-      history,
+      _id: generateID(),
       timeControl,
-      pgn: createPgn(history),
-      // TODO! get user from db to resolve this
-      // user0: createUser(user),
-      user1: null,
-      pwhite: null,
-      pblack: null,
-      state: "waiting",
+      user0,
+      chat: chat._id,
     });
+
     await game.save();
     res.json({ game });
   } catch (error) {
-    res.status(400).json(error.message);
+    handleError(error, res);
   }
 });
 
