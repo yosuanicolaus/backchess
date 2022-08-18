@@ -14,13 +14,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// returns all games, users, chats, and messages in db
+// returns all games, users, and chats in db
 app.get("/", async (req, res) => {
   const games = await Game.find();
   const users = await User.find();
   const chats = await Chat.find();
-  const messages = await Message.find();
-  res.json({ games, users, chats, messages });
+  res.json({ games, users, chats });
 });
 
 app.get("/test", (req, res) => {
