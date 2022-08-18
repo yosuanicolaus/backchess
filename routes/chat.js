@@ -8,12 +8,13 @@ router.get("/test", (req, res) => {
 });
 
 router.post("/message/new", async (req, res) => {
-  const { text, uid } = req.body;
+  const { text, username, uid } = req.body;
   if (!text) return res.status(400).json("missing {text}");
+  if (!username) return res.status(400).json("missing {username}");
   if (!uid) return res.status(400).json("missing {uid}");
 
   try {
-    const newMessage = new Message({ text, user: uid });
+    const newMessage = new Message({ text, username, uid });
     await newMessage.save();
     res.json(newMessage);
   } catch (error) {

@@ -37,9 +37,12 @@ const messageSchema = Schema(
       type: String,
       required: true,
     },
-    user: {
+    username: {
       type: String,
-      ref: "User",
+      required: true,
+    },
+    uid: {
+      type: String,
       required: true,
     },
   },

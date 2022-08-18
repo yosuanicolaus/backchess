@@ -10,6 +10,7 @@ content-type: application/json
 
 {
     "text": "Bye World!",
+    "username": "goodGuy12",
     "uid": "whoisthislolhehe"
 }
 
