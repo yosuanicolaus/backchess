@@ -86,44 +86,39 @@ router.post("/:id/join", async (req, res) => {
 
 router.post("/:id/leave", async (req, res) => {
   const { id } = req.params;
-  const { username } = req.body;
-  if (!username) return res.status(400).json("include {username} in req body");
-  // TODO: Game model now store user0 & user1 as User model
-  // which requires {name, elo, uid, email}
-  // make changes accordingly
+  const { uid } = req.body;
 
-  Game.findById(id)
-    .then((game) => {
-      if (!game) return res.status(404).json("game not found");
+  try {
+    const game = await Game.findById(id);
+    const user = await User.findById(uid);
+    if (!game) throw "404/game not found";
+    if (!user) throw "404/user not found";
 
-      if (username === game.user0) {
-        game.user0 = null;
-      } else if (username === game.user1) {
-        game.user1 = null;
-      } else {
-        return res.status(400).json("can't find that user in this game");
+    if (game.state === "waiting") {
+      if (game.user0.uid !== uid) {
+        throw "403/user is not in the game";
       }
+      // game is empty
+      await game.delete();
+      return res.json({ success: `game ${id} deleted` });
+    }
 
-      let emptyFlag = false;
-      if (!game.user0 && !game.user1) {
-        emptyFlag = true;
-        game.delete().then(() => {
-          res.json(`empty room, game ${id} deleted`);
-        });
-      }
-      if (emptyFlag) return;
-
-      if (!game.user0 && game.user1) {
-        game.user0 = game.user1;
-        game.user1 = null;
-      }
-
+    if (game.user0?.uid === uid) {
+      game.user0 = game.user1;
+      game.user1 = undefined;
       game.state = "waiting";
-      game.save().then(() => res.json(game));
-    })
-    .catch(() => {
-      res.status(404).json("game not found");
-    });
+    } else if (game.user1?.uid === uid) {
+      game.user1 = undefined;
+      game.state = "waiting";
+    } else {
+      throw "400/uid doesn't match either user0 or user1";
+    }
+
+    await game.save();
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
 });
 
 module.exports = router;

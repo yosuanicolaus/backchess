@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@gameID = GboeeNmbKC
+@gameID = e436HjqGaA
 
 
 ### /game custom test
@@ -10,7 +10,7 @@ POST {{host}}/game/new/ HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "qwertywarrior1234567",
+    "uid": "qwertywarrior123456",
     "timeControl": "2+1"
 }
 
@@ -25,7 +25,7 @@ POST {{host}}/game/{{gameID}}/join HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "poiuytrewq5311"
+    "uid": "qwertywarrior123456"
 }
 
 ### leave game
@@ -33,5 +33,5 @@ POST {{host}}/game/{{gameID}}/leave HTTP/1.1
 content-type: application/json
 
 {
-    "username": "bar"
+    "uid": "poiuytrewq5311"
 }
