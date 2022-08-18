@@ -50,23 +50,19 @@ router.get("/:id", async (req, res) => {
 });
 
 // get random joinable game
-router.get("/random/open", (req, res) => {
+router.get("/random/open", async (req, res) => {
   const query = { state: "waiting" };
-  Game.countDocuments(query, (error, total) => {
-    if (error) {
-      return res.json(error.message);
-    }
-    const randIdx = Math.floor(Math.random() * total);
-    Game.findOne(query)
-      .skip(randIdx)
-      .exec((error, game) => {
-        if (error) return res.status(400).json(error.message);
-        if (!game)
-          return res.status(404).json("There is no open game at the moment");
 
-        res.json({ game });
-      });
-  });
+  try {
+    const total = await Game.countDocuments(query);
+    if (total === 0) throw "404/no open game at the moment";
+
+    const random = Math.floor(Math.random() * total);
+    const game = await Game.findOne(query).skip(random);
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
 });
 
 // join game, mandatory {username}
