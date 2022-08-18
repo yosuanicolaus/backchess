@@ -1,3 +1,8 @@
+const { customAlphabet } = require("nanoid");
+const alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const nanoid = customAlphabet(alphabet, 10);
+
 module.exports = {
   createPgn: function (history) {
     let turn = 1;
@@ -25,5 +30,9 @@ module.exports = {
     } else {
       res.status(400).json(error.message);
     }
+  },
+
+  generateID: function () {
+    return nanoid();
   },
 };

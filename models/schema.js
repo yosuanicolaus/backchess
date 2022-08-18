@@ -1,6 +1,5 @@
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const { createPgn } = require("../utils");
-const { nanoid } = require("nanoid");
+const { createPgn, generateID } = require("../utils");
 const { Schema } = require("mongoose");
 
 const userSchema = Schema(
@@ -69,7 +68,7 @@ const gameSchema = Schema({
   chat: { type: Schema.Types.ObjectId, ref: "Chat" },
   _id: {
     type: String,
-    default: nanoid(10),
+    default: generateID(),
   },
 });
 
