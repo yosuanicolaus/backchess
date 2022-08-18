@@ -9,5 +9,6 @@ POST {{host}}/chat/message/new HTTP/1.1
 content-type: application/json
 
 {
-    "text": "Hello World!"
+    "text": "Hello World!",
+    "uid": "qwertywarrior123456"
 }
