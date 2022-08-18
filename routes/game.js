@@ -30,23 +30,23 @@ router.post("/new", async (req, res) => {
     });
 
     await game.save();
-    res.json({ game });
+    res.json(game);
   } catch (error) {
     handleError(error, res);
   }
 });
 
 // get game from database
-router.get("/:id", (req, res) => {
+router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  Game.findById(id)
-    .then((game) => {
-      if (!game) return res.status(404).json("game not found");
-      res.json({ game });
-    })
-    .catch(() => {
-      res.status(404).json("game not found");
-    });
+
+  try {
+    const game = await Game.findById(id);
+    if (!game) throw "404/game not found";
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
 });
 
 // get random joinable game
