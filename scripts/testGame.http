@@ -1,0 +1,36 @@
+@host = http://localhost:3001
+@gameID = 62fc3e0ff9c41ca7bea862d5
+
+
+### /game custom test
+GET {{host}}/game/test HTTP/1.1
+
+### create new game
+POST {{host}}/game/new/ HTTP/1.1
+content-type: application/json
+
+{
+    "user": {"name": "johndoe", "uid": "asdfqwer1234"}
+}
+
+### get game info with ID
+GET {{host}}/game/{{gameID}}/ HTTP/1.1
+
+### get random joinable game
+GET {{host}}/game/random/open/ HTTP/1.1
+
+### join game
+POST {{host}}/game/{{gameID}}/join HTTP/1.1
+content-type: application/json
+
+{
+    "username": "egg"
+}
+
+### leave game
+POST {{host}}/game/{{gameID}}/leave HTTP/1.1
+content-type: application/json
+
+{
+    "username": "bar"
+}

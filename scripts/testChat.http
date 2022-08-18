@@ -1,0 +1,13 @@
+@host = http://localhost:3001
+
+
+### /chat custom test
+GET {{host}}/chat/test HTTP/1.1
+
+### create new message
+POST {{host}}/chat/message/new HTTP/1.1
+content-type: application/json
+
+{
+    "text": "Hello World!"
+}

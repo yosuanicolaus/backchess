@@ -1,59 +1,7 @@
 @host = http://localhost:3001
-@gameID = 62fc3e0ff9c41ca7bea862d5
-@uid = qwertywarrior123456
 
 ### get all games & users from database (for testing only)
 GET {{host}}/ HTTP/1.1
 
-### create new game
-POST {{host}}/game/new/ HTTP/1.1
-content-type: application/json
-
-{
-    "user": {"name": "johndoe", "uid": "asdfqwer1234"}
-}
-
-### get game info with ID
-GET {{host}}/game/{{gameID}}/ HTTP/1.1
-
-### get random joinable game
-GET {{host}}/game/random/open/ HTTP/1.1
-
-### join game
-POST {{host}}/game/{{gameID}}/join HTTP/1.1
-content-type: application/json
-
-{
-    "username": "egg"
-}
-
-### leave game
-POST {{host}}/game/{{gameID}}/leave HTTP/1.1
-content-type: application/json
-
-{
-    "username": "bar"
-}
-
 ### / custom test
 GET {{host}}/test HTTP/1.1
-
-### /game custom test
-GET {{host}}/game/test HTTP/1.1
-
-### /user custom test
-GET {{host}}/user/test HTTP/1.1
-
-### /chat custom test
-GET {{host}}/chat/test HTTP/1.1
-
-### create new user
-POST {{host}}/user/new HTTP/1.1
-content-type: application/json
-
-{
-    "uid": "lolbye123456asdf"
-}
-
-### get user by uid
-GET {{host}}/user/{{uid}} HTTP/1.1

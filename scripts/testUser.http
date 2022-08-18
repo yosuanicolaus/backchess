@@ -1,0 +1,16 @@
+@host = http://localhost:3001
+@uid = qwertywarrior123456
+
+### /user custom test
+GET {{host}}/user/test HTTP/1.1
+
+### create new user
+POST {{host}}/user/new HTTP/1.1
+content-type: application/json
+
+{
+    "uid": "lolbye123456asdf"
+}
+
+### get user by uid
+GET {{host}}/user/{{uid}} HTTP/1.1
