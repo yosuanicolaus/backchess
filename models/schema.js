@@ -3,16 +3,31 @@ const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
   {
-    name: String,
-    elo: Number,
+    elo: {
+      type: Number,
+      default: 800,
+    },
     uid: {
       type: String,
       unique: true,
+      required: true,
+      minLength: 8,
     },
     email: String,
+    name: String,
   },
-  { _id: false }
+  {
+    timestamps: true,
+  }
 );
+
+userSchema.pre("save", function () {
+  if (this.email) {
+    this.name = this.email.split("@")[0];
+  } else {
+    this.name = `Anonymous_${this.uid.slice(0, 8)}`;
+  }
+});
 
 const message = mongoose.Schema({
   text: String,
