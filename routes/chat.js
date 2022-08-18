@@ -8,24 +8,12 @@ router.get("/test", (req, res) => {
   res.json({ test: "/chat/test successful" });
 });
 
+// *unused
 router.post("/message/new", async (req, res) => {
   const { text, username, uid } = req.body;
 
   try {
-    const newMessage = new Message({ text, username, uid });
-    await newMessage.save();
-    res.json(newMessage);
-  } catch (error) {
-    handleError(error, res);
-  }
-});
-
-router.get("/message/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const message = await Message.findById(id);
-    if (!message) throw "404/message not found";
+    const message = new Message({ text, username, uid });
     res.json(message);
   } catch (error) {
     handleError(error, res);
@@ -34,7 +22,7 @@ router.get("/message/:id", async (req, res) => {
 
 // create new chat room
 router.post("/new", async (req, res) => {
-  const chat = await new Chat();
+  const chat = new Chat();
   await chat.save();
   res.json(chat);
 });
