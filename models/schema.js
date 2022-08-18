@@ -1,3 +1,4 @@
+const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const { nanoid } = require("nanoid");
 const { Schema } = require("mongoose");
 
@@ -12,10 +13,7 @@ const userSchema = Schema(
     },
     name: String,
     email: String,
-    elo: {
-      type: Number,
-      default: 800,
-    },
+    elo: { type: Number, default: 800 },
   },
   {
     timestamps: true,
@@ -33,18 +31,9 @@ userSchema.pre("save", function () {
 
 const messageSchema = Schema(
   {
-    text: {
-      type: String,
-      required: true,
-    },
-    username: {
-      type: String,
-      required: true,
-    },
-    uid: {
-      type: String,
-      required: true,
-    },
+    text: { type: String, required: true },
+    username: { type: String, required: true },
+    uid: { type: String, required: true },
   },
   { timestamps: true }
 );
@@ -53,21 +42,37 @@ const chatSchema = Schema({
   messages: [messageSchema],
 });
 
+const playerSchema = Schema({
+  name: { type: String, required: true },
+  elo: { type: Number, required: true },
+  uid: { type: String, required: true },
+  active: { type: Boolean, required: true },
+  time: { type: Number, required: true },
+  moves: Array,
+});
+
 const gameSchema = Schema({
-  fen: String,
-  pgn: String,
+  fen: { type: String, default: defaultFen },
+  pgn: { type: String, default: "" },
+  timeControl: { type: String, required: true },
+  state: { type: String, default: "waiting" },
+  board: [[Number]],
   history: [String],
-  state: String,
-  pwhite: String,
-  pblack: String,
+  pwhite: playerSchema,
+  pblack: playerSchema,
   user0: userSchema,
   user1: userSchema,
-  timeControl: String,
-  chat: chatSchema,
+  chat: { type: Schema.Types.ObjectId, ref: "Chat" },
   _id: {
     type: String,
     default: nanoid(10),
   },
 });
 
-module.exports = { messageSchema, chatSchema, userSchema, gameSchema };
+module.exports = {
+  messageSchema,
+  chatSchema,
+  userSchema,
+  playerSchema,
+  gameSchema,
+};
