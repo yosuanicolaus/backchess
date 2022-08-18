@@ -14,9 +14,7 @@ const userSchema = Schema(
     email: String,
     elo: { type: Number, default: 800 },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 userSchema.pre("save", function () {
@@ -42,6 +40,7 @@ const chatSchema = Schema({
 });
 
 const playerSchema = Schema({
+  _id: String,
   name: { type: String, required: true },
   elo: { type: Number, required: true },
   uid: { type: String, required: true },
@@ -52,6 +51,7 @@ const playerSchema = Schema({
 });
 
 const gameSchema = Schema({
+  _id: String,
   fen: { type: String, default: defaultFen },
   pgn: { type: String, default: "" },
   timeControl: { type: String, required: true },
@@ -65,17 +65,19 @@ const gameSchema = Schema({
   user0: userSchema,
   user1: userSchema,
   chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-  _id: { type: String },
 });
 
-gameSchema.pre("save", function () {
+gameSchema.methods.updateChessData = function (chessData, lastMoveSan) {
+  const { fen, turn, board, moves } = chessData;
+  this.fen = fen;
+  this.turn = turn;
+  this.board = board;
+  this.moves = moves;
+  this.history.push(lastMoveSan);
   this.pgn = createPgn(this.history);
-
-  if (this.state === "playing") {
-    this.pwhite.active = this.turn === "w";
-    this.pblack.active = this.turn === "b";
-  }
-});
+  this.pwhite.active = this.turn === "w";
+  this.pblack.active = this.turn === "b";
+};
 
 module.exports = {
   messageSchema,
