@@ -21,4 +21,18 @@ router.post("/message/new", async (req, res) => {
   }
 });
 
+router.get("/message/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const message = await Message.findById(id);
+    if (!message) return res.status(404).json("message not found");
+
+    await message.populate("user");
+    res.json(message);
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+});
+
 module.exports = router;
