@@ -1,21 +1,21 @@
 const { nanoid } = require("nanoid");
-const mongoose = require("mongoose");
+const { Schema } = require("mongoose");
 
-const userSchema = mongoose.Schema(
+const userSchema = Schema(
   {
-    elo: {
-      type: Number,
-      default: 800,
-    },
+    _id: String,
     uid: {
       type: String,
       unique: true,
       required: true,
       minLength: 8,
     },
-    email: String,
     name: String,
-    _id: String,
+    email: String,
+    elo: {
+      type: Number,
+      default: 800,
+    },
   },
   {
     timestamps: true,
@@ -31,19 +31,24 @@ userSchema.pre("save", function () {
   this._id = this.uid;
 });
 
-const message = mongoose.Schema({
-  text: String,
-  user: userSchema,
-  time: Date,
-});
+const messageSchema = Schema(
+  {
+    text: String,
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
 
-const chatSchema = mongoose.Schema({
-  messages: [message],
+const chatSchema = Schema({
+  messages: [messageSchema],
   type: String,
   users: [userSchema],
 });
 
-const gameSchema = mongoose.Schema({
+const gameSchema = Schema({
   fen: String,
   pgn: String,
   history: [String],
@@ -60,4 +65,4 @@ const gameSchema = mongoose.Schema({
   },
 });
 
-module.exports = { message, chatSchema, userSchema, gameSchema };
+module.exports = { messageSchema, chatSchema, userSchema, gameSchema };

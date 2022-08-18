@@ -35,13 +35,13 @@ content-type: application/json
     "username": "bar"
 }
 
-### / test
+### / custom test
 GET {{host}}/test HTTP/1.1
 
-### /game test
+### /game custom test
 GET {{host}}/game/test HTTP/1.1
 
-### /user test
+### /user custom test
 GET {{host}}/user/test HTTP/1.1
 
 ### create new user
