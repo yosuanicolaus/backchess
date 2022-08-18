@@ -1,6 +1,6 @@
 @host = http://localhost:3001
 @mid = 62fdad79931832efcfaa7bd7
-@cid = 62fdceb043e3754a27e1e9d5
+@cid = 62fdd435a5678c11b62d8b5a
 
 ### /chat custom test
 GET {{host}}/chat/test HTTP/1.1
@@ -23,3 +23,13 @@ POST {{host}}/chat/new HTTP/1.1
 
 ### get chat room
 GET {{host}}/chat/{{cid}} HTTP/1.1
+
+### post message to chat
+POST {{host}}/chat/{{cid}}/new-message HTTP/1.1
+content-type: application/json
+
+{
+    "text": "Bye World!",
+    "username": "goodGuy12",
+    "uid": "qoiwryuescvnb214"
+}
