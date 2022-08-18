@@ -15,6 +15,7 @@ const userSchema = mongoose.Schema(
     },
     email: String,
     name: String,
+    _id: String,
   },
   {
     timestamps: true,
@@ -27,6 +28,7 @@ userSchema.pre("save", function () {
   } else {
     this.name = `Anonymous_${this.uid.slice(0, 8)}`;
   }
+  this._id = this.uid;
 });
 
 const message = mongoose.Schema({

@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "deleteAll": "node scripts/deleteAll.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yosuanicolaus/backchess.git",
-    "deleteAll": "node scripts/deleteAll.js"
+    "url": "git+https://github.com/yosuanicolaus/backchess.git"
   },
   "keywords": [],
   "author": "",
