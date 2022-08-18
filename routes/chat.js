@@ -1,6 +1,7 @@
 const Message = require("../models/Message");
 const Chat = require("../models/Chat");
 const express = require("express");
+const { handleError } = require("../utils");
 const router = express.Router();
 
 router.get("/test", (req, res) => {
@@ -9,16 +10,13 @@ router.get("/test", (req, res) => {
 
 router.post("/message/new", async (req, res) => {
   const { text, username, uid } = req.body;
-  if (!text) return res.status(400).json("missing {text}");
-  if (!username) return res.status(400).json("missing {username}");
-  if (!uid) return res.status(400).json("missing {uid}");
 
   try {
     const newMessage = new Message({ text, username, uid });
     await newMessage.save();
     res.json(newMessage);
   } catch (error) {
-    res.status(400).json(error.message);
+    handleError(error, res);
   }
 });
 
@@ -27,12 +25,10 @@ router.get("/message/:id", async (req, res) => {
 
   try {
     const message = await Message.findById(id);
-    if (!message) return res.status(404).json("message not found");
-
-    await message.populate("user");
+    if (!message) throw "404/message not found";
     res.json(message);
   } catch (error) {
-    res.status(400).json(error.message);
+    handleError(error, res);
   }
 });
 
