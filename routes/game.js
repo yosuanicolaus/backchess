@@ -131,4 +131,29 @@ router.post("/:id/leave", async (req, res) => {
   }
 });
 
+router.post("/:id/start", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const game = await Game.findById(id);
+    if (!game) throw "404/game not found";
+    if (game.state !== "pending") throw "403/game state must be pending";
+
+    game.state = "playing";
+    if (Math.random() < 0.5) {
+      game.pwhite = game.user0;
+      game.pblack = game.user1;
+    } else {
+      game.pwhite = game.user1;
+      game.pblack = game.user0;
+    }
+    game.pwhite.active = true;
+    game.pblack.active = false;
+    await game.save();
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 module.exports = router;

@@ -9,7 +9,7 @@ POST {{host}}/user/new HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "qwertywarrior123456"
+    "uid": "houhouwoshouwa12"
 }
 
 ### get user by uid
