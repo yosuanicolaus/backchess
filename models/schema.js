@@ -51,8 +51,6 @@ const messageSchema = Schema(
 
 const chatSchema = Schema({
   messages: [messageSchema],
-  type: String,
-  users: [userSchema],
 });
 
 const gameSchema = Schema({

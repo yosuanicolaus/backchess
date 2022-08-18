@@ -32,4 +32,24 @@ router.get("/message/:id", async (req, res) => {
   }
 });
 
+// create new chat room
+router.post("/new", async (req, res) => {
+  const chat = await new Chat();
+  await chat.save();
+  res.json(chat);
+});
+
+// get chat room info
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const chat = await Chat.findById(id);
+    if (!chat) throw "404/chat not found";
+    res.json(chat);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 module.exports = router;

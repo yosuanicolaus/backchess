@@ -1,5 +1,6 @@
 @host = http://localhost:3001
 @mid = 62fdad79931832efcfaa7bd7
+@cid = 62fdceb043e3754a27e1e9d5
 
 ### /chat custom test
 GET {{host}}/chat/test HTTP/1.1
@@ -16,3 +17,9 @@ content-type: application/json
 
 ### get message by message id
 GET {{host}}/chat/message/{{mid}} HTTP/1.1
+
+### create new chat room
+POST {{host}}/chat/new HTTP/1.1
+
+### get chat room
+GET {{host}}/chat/{{cid}} HTTP/1.1
