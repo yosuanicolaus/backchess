@@ -1,4 +1,5 @@
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const { createPgn } = require("../utils");
 const { nanoid } = require("nanoid");
 const { Schema } = require("mongoose");
 
@@ -47,8 +48,9 @@ const playerSchema = Schema({
   elo: { type: Number, required: true },
   uid: { type: String, required: true },
   active: { type: Boolean, required: true },
-  time: { type: Number, required: true },
-  moves: Array,
+  // TODO: implement player's timer
+  // time: { type: Number, required: true },
+  // record: [Date]
 });
 
 const gameSchema = Schema({
@@ -56,8 +58,10 @@ const gameSchema = Schema({
   pgn: { type: String, default: "" },
   timeControl: { type: String, required: true },
   state: { type: String, default: "waiting" },
+  turn: { type: String, default: "w" },
   board: [[Number]],
   history: [String],
+  moves: Array,
   pwhite: playerSchema,
   pblack: playerSchema,
   user0: userSchema,
@@ -67,6 +71,15 @@ const gameSchema = Schema({
     type: String,
     default: nanoid(10),
   },
+});
+
+gameSchema.pre("save", function () {
+  this.pgn = createPgn(this.history);
+
+  if (this.state === "playing") {
+    this.pwhite.active = this.turn === "w";
+    this.pblack.active = this.turn === "b";
+  }
 });
 
 module.exports = {
