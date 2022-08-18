@@ -11,7 +11,6 @@ router.get("/test", (req, res) => {
   res.json({ test: "/game test successful" });
 });
 
-// create and store new game
 router.post("/new", async (req, res) => {
   const { timeControl, uid } = req.body;
 
@@ -36,7 +35,6 @@ router.post("/new", async (req, res) => {
   }
 });
 
-// get game from database
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -49,7 +47,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// get random joinable game
 router.get("/random/open", async (req, res) => {
   const query = { state: "waiting" };
 
@@ -65,29 +62,28 @@ router.get("/random/open", async (req, res) => {
   }
 });
 
-// join game, mandatory {username}
-router.post("/:id/join", (req, res) => {
+router.post("/:id/join", async (req, res) => {
   const { id } = req.params;
-  const { username } = req.body;
-  if (!username) return res.status(400).json("include {username} in req body");
-  // TODO: Game model now store user0 & user1 as User model
-  // which requires {name, elo, uid, email}
-  // make changes accordingly
+  const { uid } = req.body;
 
-  Game.findById(id)
-    .then((game) => {
-      if (!game) return res.status(404).json("game not found");
-      if (game?.user1) return res.status(403).json("can't join, room is full");
-      game.user1 = username;
-      game.state = "pending";
-      game.save().then(() => res.json({ game }));
-    })
-    .catch(() => {
-      res.status(404).json("game not found");
-    });
+  try {
+    const game = await Game.findById(id);
+    if (!game) throw "404/game not found";
+    if (game.state !== "waiting") throw "403/game is full";
+
+    const user = await User.findById(uid);
+    if (!user) throw "404/user not found";
+    if (game.user0.uid === uid) throw "403/user already joined";
+
+    game.user1 = user;
+    game.state = "pending";
+    await game.save();
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
 });
 
-// leave game
 router.post("/:id/leave", async (req, res) => {
   const { id } = req.params;
   const { username } = req.body;
