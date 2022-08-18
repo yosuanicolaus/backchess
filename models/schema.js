@@ -33,10 +33,14 @@ userSchema.pre("save", function () {
 
 const messageSchema = Schema(
   {
-    text: String,
+    text: {
+      type: String,
+      required: true,
+    },
     user: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "User",
+      required: true,
     },
   },
   { timestamps: true }
