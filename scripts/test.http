@@ -44,6 +44,9 @@ GET {{host}}/game/test HTTP/1.1
 ### /user custom test
 GET {{host}}/user/test HTTP/1.1
 
+### /chat custom test
+GET {{host}}/chat/test HTTP/1.1
+
 ### create new user
 POST {{host}}/user/new HTTP/1.1
 content-type: application/json
