@@ -1,5 +1,6 @@
 @host = http://localhost:3001
 @gameID = 62fc3e0ff9c41ca7bea862d5
+@uid = qwertywarrior123456
 
 ### get all games & users from database (for testing only)
 GET {{host}}/ HTTP/1.1
@@ -48,8 +49,8 @@ POST {{host}}/user/new HTTP/1.1
 content-type: application/json
 
 {
-    "user": {
-        "name": "gooduid",
-        "uid": "1CNwvn2IS9eb9DPVV7esEBDhtW02"
-    }
+    "uid": "lolbye123456asdf"
 }
+
+### get user by uid
+GET {{host}}/user/{{uid}} HTTP/1.1
