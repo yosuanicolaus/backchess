@@ -138,14 +138,7 @@ router.post("/:id/ready", async (req, res) => {
     if (!game) throw "404/game not found";
     if (game.user1.uid !== uid) throw "403/only user1 can toggle ready";
 
-    if (game.state === "pending") {
-      game.state = "ready";
-    } else if (game.state === "ready") {
-      game.state = "pending";
-    } else {
-      throw "403/game state must be either 'pending' or 'ready'";
-    }
-    await game.save();
+    await game.toggleReady();
     res.json(game);
   } catch (error) {
     handleError(error, res);
@@ -162,17 +155,7 @@ router.post("/:id/start", async (req, res) => {
     if (game.state !== "ready") throw "403/game state must be ready";
     if (game.user0.uid !== uid) throw "403/only user0 can start the game";
 
-    game.state = "playing";
-    if (Math.random() < 0.5) {
-      game.pwhite = game.user0;
-      game.pblack = game.user1;
-    } else {
-      game.pwhite = game.user1;
-      game.pblack = game.user0;
-    }
-    game.pwhite.active = true;
-    game.pblack.active = false;
-    await game.save();
+    await game.startGame();
     res.json(game);
   } catch (error) {
     handleError(error, res);

@@ -67,7 +67,32 @@ const gameSchema = Schema({
   chat: { type: Schema.Types.ObjectId, ref: "Chat" },
 });
 
-gameSchema.methods.updateChessData = function (chessData, lastMoveSan) {
+gameSchema.methods.toggleReady = async function () {
+  if (this.state === "pending") {
+    this.state = "ready";
+  } else if (this.state === "ready") {
+    this.state = "pending";
+  } else {
+    throw "403/game state must be either 'pending' or 'ready'";
+  }
+  await this.save();
+};
+
+gameSchema.methods.startGame = async function () {
+  this.state = "playing";
+  if (Math.random() < 0.5) {
+    this.pwhite = this.user0;
+    this.pblack = this.user1;
+  } else {
+    this.pwhite = this.user1;
+    this.pblack = this.user0;
+  }
+  this.pwhite.active = true;
+  this.pblack.active = false;
+  await this.save();
+};
+
+gameSchema.methods.updateChessData = async function (chessData, lastMoveSan) {
   const { fen, turn, board, moves } = chessData;
   this.fen = fen;
   this.turn = turn;
@@ -77,6 +102,7 @@ gameSchema.methods.updateChessData = function (chessData, lastMoveSan) {
   this.pgn = createPgn(this.history);
   this.pwhite.active = this.turn === "w";
   this.pblack.active = this.turn === "b";
+  await this.save();
 };
 
 module.exports = {

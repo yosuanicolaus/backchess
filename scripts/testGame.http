@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@gameID = mDMJbNuVvF
+@gameID = 1JoMOW3Y4A
 
 
 ### /game custom test
@@ -11,7 +11,7 @@ content-type: application/json
 
 {
     "uid": "qwertywarrior123456",
-    "timeControl": "10+3"
+    "timeControl": "10+9"
 }
 
 ### get game info with ID
@@ -33,7 +33,7 @@ POST {{host}}/game/{{gameID}}/leave HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "houhouwoshouwa12"
+    "uid": "qwertywarrior123456"
 }
 
 ### user1 clicked on ready button
