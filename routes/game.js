@@ -100,9 +100,7 @@ router.post("/:id/leave", async (req, res) => {
 
   try {
     const game = await Game.findById(id);
-    const user = await User.findById(uid);
     if (!game) throw "404/game not found";
-    if (!user) throw "404/user not found";
 
     if (game.state === "waiting") {
       if (game.user0.uid !== uid) {
@@ -131,13 +129,38 @@ router.post("/:id/leave", async (req, res) => {
   }
 });
 
-router.post("/:id/start", async (req, res) => {
+router.post("/:id/ready", async (req, res) => {
   const { id } = req.params;
+  const { uid } = req.body;
 
   try {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
-    if (game.state !== "pending") throw "403/game state must be pending";
+    if (game.user1.uid !== uid) throw "403/only user1 can toggle ready";
+
+    if (game.state === "pending") {
+      game.state = "ready";
+    } else if (game.state === "ready") {
+      game.state = "pending";
+    } else {
+      throw "403/game state must be either 'pending' or 'ready'";
+    }
+    await game.save();
+    res.json(game);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+router.post("/:id/start", async (req, res) => {
+  const { id } = req.params;
+  const { uid } = req.body;
+
+  try {
+    const game = await Game.findById(id);
+    if (!game) throw "404/game not found";
+    if (game.state !== "ready") throw "403/game state must be ready";
+    if (game.user0.uid !== uid) throw "403/only user0 can start the game";
 
     game.state = "playing";
     if (Math.random() < 0.5) {
