@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@gameID = 1JoMOW3Y4A
+@gameID = 7pw8OlmTIT
 
 
 ### /game custom test
@@ -33,7 +33,7 @@ POST {{host}}/game/{{gameID}}/leave HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "qwertywarrior123456"
+    "uid": "houhouwoshouwa12"
 }
 
 ### user1 clicked on ready button

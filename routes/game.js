@@ -79,15 +79,10 @@ router.post("/:id/join", async (req, res) => {
   try {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
-    if (game.state !== "waiting") throw "403/game is full";
-
     const user = await User.findById(uid);
     if (!user) throw "404/user not found";
-    if (game.user0.uid === uid) throw "403/user already joined";
 
-    game.user1 = user;
-    game.state = "pending";
-    await game.save();
+    await game.joinUser(user);
     res.json(game);
   } catch (error) {
     handleError(error, res);
@@ -111,18 +106,7 @@ router.post("/:id/leave", async (req, res) => {
       return res.json({ success: `game ${id} deleted` });
     }
 
-    if (game.user0?.uid === uid) {
-      game.user0 = game.user1;
-      game.user1 = undefined;
-      game.state = "waiting";
-    } else if (game.user1?.uid === uid) {
-      game.user1 = undefined;
-      game.state = "waiting";
-    } else {
-      throw "400/uid doesn't match either user0 or user1";
-    }
-
-    await game.save();
+    await game.leaveUid(uid);
     res.json(game);
   } catch (error) {
     handleError(error, res);

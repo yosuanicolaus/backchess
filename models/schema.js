@@ -67,6 +67,29 @@ const gameSchema = Schema({
   chat: { type: Schema.Types.ObjectId, ref: "Chat" },
 });
 
+gameSchema.methods.joinUser = async function (user) {
+  if (this.state !== "waiting") throw "403/game is full";
+  if (this.user0.uid === user.uid) throw "403/user already joined";
+
+  this.user1 = user;
+  this.state = "pending";
+  await this.save();
+};
+
+gameSchema.methods.leaveUid = async function (uid) {
+  if (this.user0?.uid === uid) {
+    this.user0 = this.user1;
+    this.user1 = undefined;
+    this.state = "waiting";
+  } else if (this.user1?.uid === uid) {
+    this.user1 = undefined;
+    this.state = "waiting";
+  } else {
+    throw "400/uid doesn't match either user0 or user1";
+  }
+  await this.save();
+};
+
 gameSchema.methods.toggleReady = async function () {
   if (this.state === "pending") {
     this.state = "ready";
@@ -93,6 +116,7 @@ gameSchema.methods.startGame = async function () {
 };
 
 gameSchema.methods.updateChessData = async function (chessData, lastMoveSan) {
+  if (this.state !== "playing") throw "game is not playing";
   const { fen, turn, board, moves } = chessData;
   this.fen = fen;
   this.turn = turn;
