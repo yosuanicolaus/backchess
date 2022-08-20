@@ -66,7 +66,7 @@ const gameSchema = Schema(
     fen: { type: String, default: defaultFen },
     pgn: { type: String, default: "" },
     timeControl: { type: String, required: true },
-    state: { type: String, default: STATE.WAITING },
+    state: { type: String, default: STATE.EMPTY },
     turn: { type: String, default: "w" },
     board: [[Number]],
     history: [String],

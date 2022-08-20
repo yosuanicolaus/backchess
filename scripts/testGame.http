@@ -10,8 +10,7 @@ POST {{host}}/game/new/ HTTP/1.1
 content-type: application/json
 
 {
-    "uid": "qwertywarrior123456",
-    "timeControl": "10+9"
+    "timeControl": "23+1"
 }
 
 ### get game info with ID

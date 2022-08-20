@@ -1,6 +1,5 @@
 const User = require("../models/User");
 const Chat = require("../models/Chat");
-const Player = require("../models/Player");
 const Game = require("../models/Game");
 
 const express = require("express");
@@ -12,19 +11,15 @@ router.get("/test", async (req, res) => {
 });
 
 router.post("/new", async (req, res) => {
-  const { timeControl, uid } = req.body;
+  const { timeControl } = req.body;
 
   try {
-    const user0 = await User.findById(uid);
-    if (!user0) throw "404/user not found";
-
     const chat = new Chat();
     await chat.save();
 
     const game = new Game({
       _id: generateID(),
       timeControl,
-      user0,
       chat: chat._id,
     });
 
