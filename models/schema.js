@@ -2,6 +2,15 @@ const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const { createPgn, generateID } = require("../utils");
 const { Schema } = require("mongoose");
 
+const STATE = {
+  EMPTY: "empty",
+  WAITING: "waiting",
+  PENDING: "pending",
+  READY: "ready",
+  PLAYING: "playing",
+  ENDED: "ended",
+};
+
 const userSchema = Schema(
   {
     _id: String,
@@ -45,56 +54,100 @@ const playerSchema = Schema({
   elo: { type: Number, required: true },
   uid: { type: String, required: true },
   active: { type: Boolean, required: true },
+  online: { type: Boolean, default: true },
   // TODO: implement player's timer
   // time: { type: Number, required: true },
   // record: [Date]
 });
 
-const gameSchema = Schema({
-  _id: String,
-  fen: { type: String, default: defaultFen },
-  pgn: { type: String, default: "" },
-  timeControl: { type: String, required: true },
-  state: { type: String, default: "waiting" },
-  turn: { type: String, default: "w" },
-  board: [[Number]],
-  history: [String],
-  moves: Array,
-  pwhite: playerSchema,
-  pblack: playerSchema,
-  user0: userSchema,
-  user1: userSchema,
-  chat: { type: Schema.Types.ObjectId, ref: "Chat" },
-});
+const gameSchema = Schema(
+  {
+    _id: String,
+    fen: { type: String, default: defaultFen },
+    pgn: { type: String, default: "" },
+    timeControl: { type: String, required: true },
+    state: { type: String, default: STATE.WAITING },
+    turn: { type: String, default: "w" },
+    board: [[Number]],
+    history: [String],
+    moves: Array,
+    pwhite: playerSchema,
+    pblack: playerSchema,
+    user0: userSchema,
+    user1: userSchema,
+    chat: { type: Schema.Types.ObjectId, ref: "Chat" },
+  },
+  { timestamps: true }
+);
 
 gameSchema.methods.joinUser = async function (user) {
-  if (this.state !== "waiting") throw "403/game is full";
-  if (this.user0.uid === user.uid) throw "403/user already joined";
+  if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) {
+    throw "403/user already joined";
+  }
 
-  this.user1 = user;
-  this.state = "pending";
+  if (this.state === STATE.EMPTY) {
+    this.user0 = user;
+    this.state = STATE.WAITING;
+  } else if (this.state === STATE.WAITING) {
+    this.user1 = user;
+    this.state = STATE.PENDING;
+  } else if (this.state === STATE.PENDING || this.state === STATE.READY) {
+    throw "403/game is full";
+  } else {
+    // if game is playing / ended
+    if (this.pwhite.uid === user.uid) {
+      if (this.pwhite.online) {
+        throw "403/white is already online";
+      }
+      this.pwhite.online = true;
+    } else if (this.pblack.uid === user.uid) {
+      if (this.pblack.online) {
+        throw "403/black is already online";
+      }
+      this.pblack.online = true;
+    } else {
+      throw "403/game is already playing";
+    }
+  }
   await this.save();
 };
 
 gameSchema.methods.leaveUid = async function (uid) {
-  if (this.user0?.uid === uid) {
-    this.user0 = this.user1;
-    this.user1 = undefined;
-    this.state = "waiting";
-  } else if (this.user1?.uid === uid) {
-    this.user1 = undefined;
-    this.state = "waiting";
+  if (!uid) throw "400/uid must be defined";
+  if (this.user0?.uid !== uid && this.user1?.uid !== uid) {
+    throw "400/uid doesn't match any player's";
+  }
+
+  if (this.state === STATE.EMPTY) {
+    throw "400/game is already empty";
+  } else if (this.state === STATE.WAITING) {
+    this.user0 = undefined;
+    this.state = STATE.EMPTY;
+  } else if (this.state === STATE.PENDING || this.state === STATE.READY) {
+    if (this.user0.uid === uid) {
+      this.user0 = this.user1;
+      this.user1 = undefined;
+      this.state = STATE.WAITING;
+    } else if (this.user1.uid === uid) {
+      this.user1 = undefined;
+      this.state = STATE.WAITING;
+    }
   } else {
-    throw "400/uid doesn't match either user0 or user1";
+    // if game is playing / ended
+    if (this.pwhite.uid === uid) {
+      this.pwhite.online = false;
+    } else if (this.pblack.uid === uid) {
+      this.pblack.online = false;
+    }
   }
   await this.save();
 };
 
 gameSchema.methods.toggleReady = async function () {
-  if (this.state === "pending") {
-    this.state = "ready";
-  } else if (this.state === "ready") {
-    this.state = "pending";
+  if (this.state === STATE.PENDING) {
+    this.state = STATE.READY;
+  } else if (this.state === STATE.READY) {
+    this.state = STATE.PENDING;
   } else {
     throw "403/game state must be either 'pending' or 'ready'";
   }
@@ -102,7 +155,7 @@ gameSchema.methods.toggleReady = async function () {
 };
 
 gameSchema.methods.startGame = async function () {
-  this.state = "playing";
+  this.state = STATE.PLAYING;
   if (Math.random() < 0.5) {
     this.pwhite = this.user0;
     this.pblack = this.user1;
@@ -116,7 +169,7 @@ gameSchema.methods.startGame = async function () {
 };
 
 gameSchema.methods.updateChessData = async function (chessData, lastMoveSan) {
-  if (this.state !== "playing") throw "game is not playing";
+  if (this.state !== STATE.PLAYING) throw "game is not playing";
   const { fen, turn, board, moves } = chessData;
   this.fen = fen;
   this.turn = turn;

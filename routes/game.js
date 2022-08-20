@@ -8,17 +8,7 @@ const router = express.Router();
 const { generateID, handleError } = require("../utils");
 
 router.get("/test", async (req, res) => {
-  const game = await Game.findById("Ay513wY8St");
-  game.pwhite = game.user0;
-  game.pblack = game.user1;
-  game.updateChessData({
-    fen: "lalala",
-    turn: "b",
-    board: [2, 3, 4, 5],
-    moves: [{ a: "e4", 2: "e5" }],
-  });
-  await game.save();
-  res.json(game);
+  res.json({ success: "/game/test successful" });
 });
 
 router.post("/new", async (req, res) => {
@@ -97,15 +87,6 @@ router.post("/:id/leave", async (req, res) => {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
 
-    if (game.state === "waiting") {
-      if (game.user0.uid !== uid) {
-        throw "403/user is not in the game";
-      }
-      // game is empty
-      await game.delete();
-      return res.json({ success: `game ${id} deleted` });
-    }
-
     await game.leaveUid(uid);
     res.json(game);
   } catch (error) {
@@ -120,7 +101,7 @@ router.post("/:id/ready", async (req, res) => {
   try {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
-    if (game.user1.uid !== uid) throw "403/only user1 can toggle ready";
+    if (game.user1.uid !== uid) throw "403/only challenger can toggle ready";
 
     await game.toggleReady();
     res.json(game);
@@ -137,7 +118,7 @@ router.post("/:id/start", async (req, res) => {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
     if (game.state !== "ready") throw "403/game state must be ready";
-    if (game.user0.uid !== uid) throw "403/only user0 can start the game";
+    if (game.user0.uid !== uid) throw "403/only game owner can start the game";
 
     await game.startGame();
     res.json(game);
