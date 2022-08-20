@@ -17,10 +17,12 @@ io.on("connection", (socket) => {
       socket.join(id);
       const game = await Game.findById(id);
       if (!game) throw "game not found";
-      const user = await User.findById(uid);
-      if (!user) throw "user not found";
 
-      await game.joinUser(user);
+      if (game.user0.uid !== uid && !game.user1) {
+        const user = await User.findById(uid);
+        await game.joinUser(user);
+      }
+
       io.to(id).emit("update-game", game);
     } catch (error) {
       emitError(io, id, error);
@@ -49,12 +51,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnecting", () => {
-    const rooms = socket.rooms.slice();
-    rooms.forEach((room) => {
-      io.to(room).emit("info", "a user is disconnecting");
-    });
-
+  socket.on("disconnect", () => {
     console.log("a user just disconnected");
   });
 });
