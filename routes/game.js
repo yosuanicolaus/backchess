@@ -8,17 +8,7 @@ const router = express.Router();
 const { generateID, handleError } = require("../utils");
 
 router.get("/test", async (req, res) => {
-  const game = await Game.findById("Ay513wY8St");
-  game.pwhite = game.user0;
-  game.pblack = game.user1;
-  game.updateChessData({
-    fen: "lalala",
-    turn: "b",
-    board: [2, 3, 4, 5],
-    moves: [{ a: "e4", 2: "e5" }],
-  });
-  await game.save();
-  res.json(game);
+  res.json({ success: "/game/test successful" });
 });
 
 router.post("/new", async (req, res) => {
