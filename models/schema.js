@@ -54,6 +54,7 @@ const playerSchema = Schema({
   elo: { type: Number, required: true },
   uid: { type: String, required: true },
   active: { type: Boolean, required: true },
+  online: { type: Boolean, default: true },
   // TODO: implement player's timer
   // time: { type: Number, required: true },
   // record: [Date]
@@ -80,7 +81,9 @@ const gameSchema = Schema(
 );
 
 gameSchema.methods.joinUser = async function (user) {
-  if (this.user0.uid === user.uid) throw "403/user already joined";
+  if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) {
+    throw "403/user already joined";
+  }
 
   if (this.state === STATE.EMPTY) {
     this.user0 = user;
@@ -88,10 +91,24 @@ gameSchema.methods.joinUser = async function (user) {
   } else if (this.state === STATE.WAITING) {
     this.user1 = user;
     this.state = STATE.PENDING;
-  } else {
+  } else if (this.state === STATE.PENDING || this.state === STATE.READY) {
     throw "403/game is full";
+  } else {
+    // if game is playing / ended
+    if (this.pwhite.uid === user.uid) {
+      if (this.pwhite.online) {
+        throw "403/white is already online";
   }
-
+      this.pwhite.online = true;
+    } else if (this.pblack.uid === user.uid) {
+      if (this.pblack.online) {
+        throw "403/black is already online";
+      }
+      this.pblack.online = true;
+    } else {
+      throw "403/game is already playing";
+    }
+  }
   await this.save();
 };
 
