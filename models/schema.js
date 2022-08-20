@@ -98,7 +98,7 @@ gameSchema.methods.joinUser = async function (user) {
     if (this.pwhite.uid === user.uid) {
       if (this.pwhite.online) {
         throw "403/white is already online";
-  }
+      }
       this.pwhite.online = true;
     } else if (this.pblack.uid === user.uid) {
       if (this.pblack.online) {
@@ -113,15 +113,32 @@ gameSchema.methods.joinUser = async function (user) {
 };
 
 gameSchema.methods.leaveUid = async function (uid) {
-  if (this.user0?.uid === uid) {
-    this.user0 = this.user1;
-    this.user1 = undefined;
-    this.state = STATE.WAITING;
-  } else if (this.user1?.uid === uid) {
-    this.user1 = undefined;
-    this.state = STATE.WAITING;
+  if (!uid) throw "400/uid must be defined";
+  if (this.user0?.uid !== uid && this.user1?.uid !== uid) {
+    throw "400/uid doesn't match any player's";
+  }
+
+  if (this.state === STATE.EMPTY) {
+    throw "400/game is already empty";
+  } else if (this.state === STATE.WAITING) {
+    this.user0 = undefined;
+    this.state = STATE.EMPTY;
+  } else if (this.state === STATE.PENDING || this.state === STATE.READY) {
+    if (this.user0.uid === uid) {
+      this.user0 = this.user1;
+      this.user1 = undefined;
+      this.state = STATE.WAITING;
+    } else if (this.user1.uid === uid) {
+      this.user1 = undefined;
+      this.state = STATE.WAITING;
+    }
   } else {
-    throw "400/uid doesn't match either user0 or user1";
+    // if game is playing / ended
+    if (this.pwhite.uid === uid) {
+      this.pwhite.online = false;
+    } else if (this.pblack.uid === uid) {
+      this.pblack.online = false;
+    }
   }
   await this.save();
 };
