@@ -96,7 +96,6 @@ router.post("/:id/ready", async (req, res) => {
   try {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
-    if (game.user1.uid !== uid) throw "403/only challenger can toggle ready";
 
     await game.toggleReady();
     res.json(game);

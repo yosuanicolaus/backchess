@@ -81,9 +81,7 @@ const gameSchema = Schema(
 );
 
 gameSchema.methods.joinUser = async function (user) {
-  if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) {
-    throw "403/user already joined";
-  }
+  if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) return;
 
   if (this.state === STATE.EMPTY) {
     this.user0 = user;
@@ -96,14 +94,8 @@ gameSchema.methods.joinUser = async function (user) {
   } else {
     // if game is playing / ended
     if (this.pwhite.uid === user.uid) {
-      if (this.pwhite.online) {
-        throw "403/white is already online";
-      }
       this.pwhite.online = true;
     } else if (this.pblack.uid === user.uid) {
-      if (this.pblack.online) {
-        throw "403/black is already online";
-      }
       this.pblack.online = true;
     } else {
       throw "403/game is already playing";
@@ -114,9 +106,7 @@ gameSchema.methods.joinUser = async function (user) {
 
 gameSchema.methods.leaveUid = async function (uid) {
   if (!uid) throw "400/uid must be defined";
-  if (this.user0?.uid !== uid && this.user1?.uid !== uid) {
-    throw "400/uid doesn't match any player's";
-  }
+  if (this.user0?.uid !== uid && this.user1?.uid !== uid) return;
 
   if (this.state === STATE.EMPTY) {
     throw "400/game is already empty";
@@ -144,6 +134,10 @@ gameSchema.methods.leaveUid = async function (uid) {
 };
 
 gameSchema.methods.toggleReady = async function () {
+  if (game.user1.uid !== uid) {
+    throw "403/only challenger can toggle ready";
+  }
+
   if (this.state === STATE.PENDING) {
     this.state = STATE.READY;
   } else if (this.state === STATE.READY) {
