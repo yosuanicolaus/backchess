@@ -10,9 +10,11 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
+  console.log("connection established with", socket.id);
+
   socket.on("setup", ({ uid, name }) => {
     socket.uid = uid;
-    socket.username = name;
+    socket.name = name;
     console.log(`setup ${name} with uid ${uid}`);
   });
 
@@ -24,9 +26,11 @@ io.on("connection", (socket) => {
       if (!user) throw "user not found";
 
       await game.joinUser(user);
+      io.to(id).emit("log", `${socket.name} joined the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
-      emitError(io, id, error);
+      console.log("join failed", error);
+      emitLog(id, error);
     }
   };
 
@@ -36,9 +40,19 @@ io.on("connection", (socket) => {
       if (!game) throw "game not found";
 
       await game.leaveUid(uid);
+      io.to(id).emit("log", `${socket.name} left the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
-      emitError(io, id, error);
+      console.log("leave failed", error);
+      emitLog(id, error);
+    }
+  };
+
+  const emitLog = async (id, data) => {
+    if (typeof data === "string") {
+      io.to(id).emit("log", data);
+    } else {
+      io.to(id).emit("log", data.message);
     }
   };
 
@@ -61,14 +75,10 @@ io.on("connection", (socket) => {
       }
     });
   });
-});
 
-function emitError(io, room, error) {
-  if (typeof error === "string") {
-    io.to(room).emit("error", error);
-  } else {
-    io.to(room).emit("error", error.message);
-  }
-}
+  socket.on("disconnect", () => {
+    console.log("connection severed.... with", socket.id);
+  });
+});
 
 module.exports = server;
