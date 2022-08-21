@@ -16,9 +16,8 @@ io.on("connection", (socket) => {
     console.log(`setup ${name} with uid ${uid}`);
   });
 
-  socket.on("join", async ({ id, uid }) => {
+  const joinGame = async (id, uid) => {
     try {
-      socket.join(id);
       const game = await Game.findById(id);
       if (!game) throw "game not found";
       const user = await User.findById(uid);
@@ -29,11 +28,10 @@ io.on("connection", (socket) => {
     } catch (error) {
       emitError(io, id, error);
     }
-  });
+  };
 
-  socket.on("leave", async ({ id, uid }) => {
+  const leaveGame = async (id, uid) => {
     try {
-      socket.leave(id);
       const game = await Game.findById(id);
       if (!game) throw "game not found";
 
@@ -42,24 +40,24 @@ io.on("connection", (socket) => {
     } catch (error) {
       emitError(io, id, error);
     }
+  };
+
+  socket.on("join", async ({ id }) => {
+    socket.join(id);
+    joinGame(id, socket.uid);
+  });
+
+  socket.on("leave", async ({ id }) => {
+    socket.leave(id);
+    leaveGame(id, socket.uid);
   });
 
   socket.on("disconnecting", () => {
     socket.rooms.forEach(async (id) => {
       if (id.length === 10) {
         // if it's a game id
-        const uid = socket.uid;
-
-        try {
-          socket.leave(id);
-          const game = await Game.findById(id);
-          if (!game) throw "game not found";
-
-          await game.leaveUid(uid);
-          io.to(id).emit("update-game", game);
-        } catch (error) {
-          emitError(io, id, error);
-        }
+        socket.leave(id);
+        leaveGame(id, socket.uid);
       }
     });
   });
