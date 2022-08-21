@@ -97,7 +97,7 @@ router.post("/:id/ready", async (req, res) => {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
 
-    await game.toggleReady();
+    await game.toggleReady(uid);
     res.json(game);
   } catch (error) {
     handleError(error, res);
@@ -111,10 +111,8 @@ router.post("/:id/start", async (req, res) => {
   try {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
-    if (game.state !== "ready") throw "403/game state must be ready";
-    if (game.user0.uid !== uid) throw "403/only game owner can start the game";
 
-    await game.startGame();
+    await game.startGame(uid);
     res.json(game);
   } catch (error) {
     handleError(error, res);

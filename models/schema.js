@@ -133,8 +133,8 @@ gameSchema.methods.leaveUid = async function (uid) {
   await this.save();
 };
 
-gameSchema.methods.toggleReady = async function () {
-  if (game.user1.uid !== uid) {
+gameSchema.methods.toggleReady = async function (uid) {
+  if (this.user1.uid !== uid) {
     throw "403/only challenger can toggle ready";
   }
 
@@ -148,7 +148,10 @@ gameSchema.methods.toggleReady = async function () {
   await this.save();
 };
 
-gameSchema.methods.startGame = async function () {
+gameSchema.methods.startGame = async function (uid) {
+  if (this.state !== "ready") throw "403/game state must be ready";
+  if (this.user0.uid !== uid) throw "403/only game owner can start the game";
+
   this.state = STATE.PLAYING;
   if (Math.random() < 0.5) {
     this.pwhite = this.user0;
