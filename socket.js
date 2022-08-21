@@ -10,19 +10,21 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("a user just connected");
+  socket.on("setup", ({ uid, name }) => {
+    socket.uid = uid;
+    socket.username = name;
+    console.log(`setup ${name} with uid ${uid}`);
+  });
 
   socket.on("join", async ({ id, uid }) => {
     try {
       socket.join(id);
       const game = await Game.findById(id);
       if (!game) throw "game not found";
+      const user = await User.findById(uid);
+      if (!user) throw "user not found";
 
-      if (game.user0.uid !== uid && !game.user1) {
-        const user = await User.findById(uid);
-        await game.joinUser(user);
-      }
-
+      await game.joinUser(user);
       io.to(id).emit("update-game", game);
     } catch (error) {
       emitError(io, id, error);
@@ -35,15 +37,6 @@ io.on("connection", (socket) => {
       const game = await Game.findById(id);
       if (!game) throw "game not found";
 
-      if (game.state === "waiting") {
-        if (game.user0.uid !== uid) {
-          throw "403/user is not in the game";
-        }
-        // game is empty
-        await game.delete();
-        return res.json({ success: `game ${id} deleted` });
-      }
-
       await game.leaveUid(uid);
       io.to(id).emit("update-game", game);
     } catch (error) {
@@ -51,8 +44,24 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnect", () => {
-    console.log("a user just disconnected");
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach(async (id) => {
+      if (id.length === 10) {
+        // if it's a game id
+        const uid = socket.uid;
+
+        try {
+          socket.leave(id);
+          const game = await Game.findById(id);
+          if (!game) throw "game not found";
+
+          await game.leaveUid(uid);
+          io.to(id).emit("update-game", game);
+        } catch (error) {
+          emitError(io, id, error);
+        }
+      }
+    });
   });
 });
 
