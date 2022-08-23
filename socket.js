@@ -15,6 +15,7 @@ io.on("connection", (socket) => {
   socket.on("setup", ({ uid, name }) => {
     socket.uid = uid;
     socket.name = name;
+    socket.join(uid);
     console.log(`setup ${name} with uid ${uid}`);
   });
 
@@ -29,7 +30,6 @@ io.on("connection", (socket) => {
       io.to(id).emit("log", `${socket.name} joined the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
-      console.log("join failed", error);
       emitLog(id, error);
     }
   };
@@ -43,7 +43,18 @@ io.on("connection", (socket) => {
       io.to(id).emit("log", `${socket.name} left the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
-      console.log("leave failed", error);
+      emitLog(id, error);
+    }
+  };
+
+  const toggleReady = async (id, uid) => {
+    try {
+      const game = await Game.findById(id);
+      if (!game) throw "game not found";
+
+      await game.toggleReady(uid);
+      io.to(id).emit("update-game", game);
+    } catch (error) {
       emitLog(id, error);
     }
   };
@@ -64,6 +75,10 @@ io.on("connection", (socket) => {
   socket.on("leave", async ({ id }) => {
     socket.leave(id);
     leaveGame(id, socket.uid);
+  });
+
+  socket.on("toggle", ({ id }) => {
+    toggleReady(id, socket.uid);
   });
 
   socket.on("disconnecting", () => {
