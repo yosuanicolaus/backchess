@@ -1,6 +1,5 @@
+const { getGame, getUser } = require("./utils");
 const Chess = require("./logichess/index");
-const Game = require("./models/Game");
-const User = require("./models/User");
 
 const express = require("express");
 const app = express();
@@ -21,11 +20,8 @@ io.on("connection", (socket) => {
 
   const joinGame = async (id, uid) => {
     try {
-      const game = await Game.findById(id);
-      if (!game) throw "game not found";
-      const user = await User.findById(uid);
-      if (!user) throw "user not found";
-
+      const game = await getGame(id);
+      const user = await getUser(uid);
       await game.joinUser(user);
       io.to(id).emit("log", `${socket.name} joined the room`);
       io.to(id).emit("update-game", game);
@@ -36,9 +32,7 @@ io.on("connection", (socket) => {
 
   const leaveGame = async (id, uid) => {
     try {
-      const game = await Game.findById(id);
-      if (!game) throw "game not found";
-
+      const game = await getGame(id);
       await game.leaveUid(uid);
       io.to(id).emit("log", `${socket.name} left the room`);
       io.to(id).emit("update-game", game);
@@ -49,9 +43,7 @@ io.on("connection", (socket) => {
 
   const toggleReady = async (id, uid) => {
     try {
-      const game = await Game.findById(id);
-      if (!game) throw "game not found";
-
+      const game = await getGame(id);
       await game.toggleReady(uid);
       io.to(id).emit("update-game", game);
     } catch (error) {
@@ -61,9 +53,7 @@ io.on("connection", (socket) => {
 
   const startGame = async (id, uid) => {
     try {
-      const game = await Game.findById(id);
-      if (!game) throw "game not found";
-
+      const game = await getGame(id);
       await game.startGame(uid);
       io.to(id).emit("update-game", game);
     } catch (error) {

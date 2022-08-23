@@ -1,7 +1,7 @@
+const { handleError, getChat } = require("../utils");
 const Message = require("../models/Message");
 const Chat = require("../models/Chat");
 const express = require("express");
-const { handleError } = require("../utils");
 const router = express.Router();
 
 router.get("/test", (req, res) => {
@@ -32,8 +32,7 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const chat = await Chat.findById(id);
-    if (!chat) throw "404/chat not found";
+    const chat = await getChat(id);
     res.json(chat);
   } catch (error) {
     handleError(error, res);
@@ -46,9 +45,7 @@ router.post("/:id/new-message", async (req, res) => {
   const { text, username, uid } = req.body;
 
   try {
-    const chat = await Chat.findById(id);
-    if (!chat) throw "404/chat not found";
-
+    const chat = await getChat(id);
     const message = new Message({ text, username, uid });
     chat.messages.push(message);
 

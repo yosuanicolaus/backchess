@@ -1,8 +1,7 @@
 require("dotenv").config();
-const Game = require("./models/Game");
 const User = require("./models/User");
 const Chat = require("./models/Chat");
-const Message = require("./models/Message");
+const Game = require("./models/Game");
 const gameRouter = require("./routes/game");
 const userRouter = require("./routes/user");
 const chatRouter = require("./routes/chat");

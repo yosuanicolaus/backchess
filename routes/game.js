@@ -1,10 +1,9 @@
-const User = require("../models/User");
+const { generateID, handleError, getGame, getUser } = require("../utils");
 const Chat = require("../models/Chat");
 const Game = require("../models/Game");
 
 const express = require("express");
 const router = express.Router();
-const { generateID, handleError } = require("../utils");
 
 router.get("/test", async (req, res) => {
   res.json({ success: "/game/test successful" });
@@ -16,7 +15,6 @@ router.post("/new", async (req, res) => {
   try {
     const chat = new Chat();
     await chat.save();
-
     const game = new Game({
       _id: generateID(),
       timeControl,
@@ -34,8 +32,7 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const game = await Game.findById(id);
-    if (!game) throw "404/game not found";
+    const game = await getGame(id);
     res.json(game);
   } catch (error) {
     handleError(error, res);
@@ -62,10 +59,8 @@ router.post("/:id/join", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const game = await Game.findById(id);
-    if (!game) throw "404/game not found";
-    const user = await User.findById(uid);
-    if (!user) throw "404/user not found";
+    const game = await getGame(id);
+    const user = await getUser(uid);
 
     await game.joinUser(user);
     res.json(game);
@@ -79,9 +74,7 @@ router.post("/:id/leave", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const game = await Game.findById(id);
-    if (!game) throw "404/game not found";
-
+    const game = await getGame(id);
     await game.leaveUid(uid);
     res.json(game);
   } catch (error) {
@@ -94,9 +87,7 @@ router.post("/:id/ready", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const game = await Game.findById(id);
-    if (!game) throw "404/game not found";
-
+    const game = await getGame(id);
     await game.toggleReady(uid);
     res.json(game);
   } catch (error) {
@@ -109,9 +100,7 @@ router.post("/:id/start", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const game = await Game.findById(id);
-    if (!game) throw "404/game not found";
-
+    const game = await getGame(id);
     await game.startGame(uid);
     res.json(game);
   } catch (error) {

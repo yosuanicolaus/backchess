@@ -1,6 +1,6 @@
+const { handleError, getUser } = require("../utils");
 const User = require("../models/User");
 const express = require("express");
-const { handleError } = require("../utils");
 const router = express.Router();
 
 // /user/test
@@ -13,9 +13,9 @@ router.post("/new", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const newUser = new User({ uid });
-    await newUser.save();
-    res.json(newUser);
+    const user = new User({ uid });
+    await user.save();
+    res.json(user);
   } catch (error) {
     handleError(error, res);
   }
@@ -26,8 +26,7 @@ router.get("/:uid", async (req, res) => {
   const { uid } = req.params;
 
   try {
-    const user = await User.findById(uid);
-    if (!user) throw "404/user not found";
+    const user = await getUser(uid);
     res.json(user);
   } catch (error) {
     handleError(error, res);
