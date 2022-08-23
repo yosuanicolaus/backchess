@@ -59,6 +59,18 @@ io.on("connection", (socket) => {
     }
   };
 
+  const startGame = async (id, uid) => {
+    try {
+      const game = await Game.findById(id);
+      if (!game) throw "game not found";
+
+      await game.startGame(uid);
+      io.to(id).emit("update-game", game);
+    } catch (error) {
+      emitLog(id, error);
+    }
+  };
+
   const emitLog = async (id, data) => {
     if (typeof data === "string") {
       io.to(id).emit("log", data);
@@ -79,6 +91,10 @@ io.on("connection", (socket) => {
 
   socket.on("toggle", ({ id }) => {
     toggleReady(id, socket.uid);
+  });
+
+  socket.on("start", ({ id }) => {
+    startGame(id, socket.uid);
   });
 
   socket.on("disconnecting", () => {
