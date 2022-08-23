@@ -1,4 +1,4 @@
-const { getGame, getUser } = require("./utils");
+const { getGame, getUser, getChat, createMessage } = require("./utils");
 const Chess = require("./logichess/index");
 
 const express = require("express");
@@ -41,6 +41,18 @@ io.on("connection", (socket) => {
     }
   };
 
+  const newMessage = async (id, text, username, uid) => {
+    try {
+      const chat = await getChat(id);
+      const message = createMessage(text, username, uid);
+      chat.messages.push(message);
+      await chat.save();
+      io.to(id).emit("update-chat", chat);
+    } catch (error) {
+      emitLog(id, error);
+    }
+  };
+
   const toggleReady = async (id, uid) => {
     try {
       const game = await getGame(id);
@@ -61,7 +73,7 @@ io.on("connection", (socket) => {
     }
   };
 
-  const emitLog = async (id, data) => {
+  const emitLog = (id, data) => {
     if (typeof data === "string") {
       io.to(id).emit("log", data);
     } else {
@@ -69,14 +81,24 @@ io.on("connection", (socket) => {
     }
   };
 
-  socket.on("join", async ({ id }) => {
+  socket.on("join", ({ id }) => {
     socket.join(id);
+  });
+
+  socket.on("leave", ({ id }) => {
+    socket.leave(id);
+  });
+
+  socket.on("join-game", ({ id }) => {
     joinGame(id, socket.uid);
   });
 
-  socket.on("leave", async ({ id }) => {
-    socket.leave(id);
+  socket.on("leave-game", ({ id }) => {
     leaveGame(id, socket.uid);
+  });
+
+  socket.on("new-message", ({ id, text }) => {
+    newMessage(id, text, socket.name, socket.uid);
   });
 
   socket.on("toggle", ({ id }) => {

@@ -1,6 +1,7 @@
 const User = require("./models/User");
 const Chat = require("./models/Chat");
 const Game = require("./models/Game");
+const Message = require("./models/Message");
 
 const { customAlphabet } = require("nanoid");
 const alphabet =
@@ -38,5 +39,10 @@ module.exports = {
     const game = await Game.findById(id);
     if (!game) throw "404/game not found";
     return game;
+  },
+
+  createMessage: function (text, username, uid) {
+    const message = new Message({ text, username, uid });
+    return message;
   },
 };
