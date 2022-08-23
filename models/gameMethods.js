@@ -1,4 +1,10 @@
-const { STATE } = require("./gameData");
+const {
+  STATE,
+  defaultTurn,
+  defaultFen,
+  defaultBoard,
+  defaultMoves,
+} = require("./gameData");
 
 function createPgn(history) {
   let turn = 1;
@@ -93,6 +99,11 @@ module.exports = {
     if (this.user0.uid !== uid) throw "403/only game owner can start the game";
 
     this.state = STATE.PLAYING;
+    this.turn = defaultTurn;
+    this.fen = defaultFen;
+    this.board = defaultBoard;
+    this.moves = defaultMoves;
+
     if (Math.random() < 0.5) {
       this.pwhite = this.user0;
       this.pblack = this.user1;

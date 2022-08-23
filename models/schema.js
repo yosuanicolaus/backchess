@@ -1,5 +1,5 @@
 const { Schema } = require("mongoose");
-const { defaultFen, STATE } = require("./gameData");
+const { STATE } = require("./gameData");
 const {
   joinUser,
   leaveUid,
@@ -60,14 +60,14 @@ const playerSchema = Schema({
 const gameSchema = Schema(
   {
     _id: String,
-    fen: { type: String, default: defaultFen },
-    pgn: { type: String, default: "" },
     timeControl: { type: String, required: true },
     state: { type: String, default: STATE.EMPTY },
-    turn: { type: String, default: "w" },
-    board: [[Number]],
-    history: [String],
+    turn: String,
+    fen: String,
+    board: [[String]],
     moves: Array,
+    history: [String],
+    pgn: String,
     pwhite: playerSchema,
     pblack: playerSchema,
     user0: userSchema,
