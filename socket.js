@@ -111,7 +111,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnecting", () => {
     socket.rooms.forEach(async (id) => {
-      if (id.length === 10) {
+      if (id?.length === 10) {
         // if it's a game id
         socket.leave(id);
         leaveGame(id, socket.uid);
