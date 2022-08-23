@@ -1,5 +1,4 @@
 const defaultFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const { createPgn, generateID } = require("../utils");
 const { Schema } = require("mongoose");
 
 const STATE = {
@@ -80,6 +79,22 @@ const gameSchema = Schema(
   { timestamps: true }
 );
 
+gameSchema.methods.updatePgn = function () {
+  let turn = 1;
+  let half = true;
+  let pgn = [];
+  this.history.forEach((san) => {
+    if (half) {
+      pgn.push(`${turn}.`, san);
+    } else {
+      pgn.push(san);
+      turn++;
+    }
+    half = !half;
+  });
+  this.pgn = pgn.join(" ");
+};
+
 gameSchema.methods.joinUser = async function (user) {
   if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) return;
 
@@ -149,7 +164,7 @@ gameSchema.methods.toggleReady = async function (uid) {
 };
 
 gameSchema.methods.startGame = async function (uid) {
-  if (this.state !== "ready") throw "403/game state must be ready";
+  if (this.state !== STATE.READY) throw "403/game state must be ready";
   if (this.user0.uid !== uid) throw "403/only game owner can start the game";
 
   this.state = STATE.PLAYING;
@@ -173,9 +188,9 @@ gameSchema.methods.updateChessData = async function (chessData, lastMoveSan) {
   this.board = board;
   this.moves = moves;
   this.history.push(lastMoveSan);
-  this.pgn = createPgn(this.history);
   this.pwhite.active = this.turn === "w";
   this.pblack.active = this.turn === "b";
+  this.updatePgn();
   await this.save();
 };
 
