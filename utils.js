@@ -45,4 +45,16 @@ module.exports = {
     const message = new Message({ text, username, uid });
     return message;
   },
+
+  checkValidPlayer: function (uid, game) {
+    if (uid !== game.pwhite.uid || uid !== game.pblack.uid)
+      throw "403/uid doesn't match both players";
+    if (
+      (game.turn === "w" && game.pwhite.uid === uid) ||
+      (game.turn === "b" && game.pblack.uid === uid)
+    ) {
+      return true;
+    }
+    throw "400/mismatch data";
+  },
 };

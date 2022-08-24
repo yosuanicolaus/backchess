@@ -1,4 +1,10 @@
-const { getGame, getUser, getChat, createMessage } = require("./utils");
+const {
+  getGame,
+  getUser,
+  getChat,
+  createMessage,
+  checkValidPlayer,
+} = require("./utils");
 const Chess = require("./logichess/index");
 
 const app = require("./app");
@@ -26,6 +32,7 @@ io.on("connection", (socket) => {
       io.to(id).emit("update-game", game);
     } catch (error) {
       emitLog(id, error);
+      io.to(socket.uid).emit("reload");
     }
   };
 
@@ -72,6 +79,18 @@ io.on("connection", (socket) => {
     }
   };
 
+  const playMove = async (id, uid, move) => {
+    try {
+      const game = await getGame(id);
+      checkValidPlayer(uid, game);
+      const chess = new Chess(move.fenResult);
+      await game.updateChessData(chess.data, move.san);
+      io.to(id).emit("update-game", game);
+    } catch (error) {
+      emitLog(id, error);
+    }
+  };
+
   const emitLog = (id, data) => {
     if (typeof data === "string") {
       io.to(id).emit("log", data);
@@ -108,8 +127,12 @@ io.on("connection", (socket) => {
     startGame(id, socket.uid);
   });
 
+  socket.on("play", ({ id, move }) => {
+    playMove(id, socket.uid, move);
+  });
+
   socket.on("disconnecting", () => {
-    socket.rooms.forEach(async (id) => {
+    socket.rooms.forEach((id) => {
       if (id?.length === 10) {
         // if it's a game id
         socket.leave(id);
