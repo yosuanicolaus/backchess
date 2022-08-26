@@ -62,6 +62,7 @@ const gameSchema = Schema(
     _id: String,
     timeControl: { type: String, required: true },
     state: { type: String, default: STATE.EMPTY },
+    status: String,
     turn: String,
     fen: String,
     board: [[String]],

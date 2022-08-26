@@ -8,6 +8,12 @@ module.exports = {
     ENDED: "ended",
   },
 
+  STATUS: {
+    NORMAL: "normal",
+    CHECK: "check",
+    END: "end",
+  },
+
   defaultTurn: "w",
 
   defaultFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",

@@ -4,6 +4,7 @@ const {
   defaultFen,
   defaultBoard,
   defaultMoves,
+  STATUS,
 } = require("./gameData");
 
 function createPgn(history) {
@@ -99,6 +100,7 @@ module.exports = {
     if (this.user0.uid !== uid) throw "403/only game owner can start the game";
 
     this.state = STATE.PLAYING;
+    this.status = STATUS.NORMAL;
     this.turn = defaultTurn;
     this.fen = defaultFen;
     this.board = defaultBoard;
@@ -118,7 +120,9 @@ module.exports = {
 
   updateChessData: async function (chessData, lastMoveSan) {
     if (this.state !== STATE.PLAYING) throw "game is not playing";
-    const { fen, turn, board, moves } = chessData;
+    const { status, fen, turn, board, moves } = chessData;
+
+    this.status = status;
     this.fen = fen;
     this.turn = turn;
     this.board = board;
@@ -127,6 +131,12 @@ module.exports = {
     this.pgn = createPgn(this.history);
     this.pwhite.active = this.turn === "w";
     this.pblack.active = this.turn === "b";
+
+    if (status === STATUS.END) {
+      this.state = STATE.ENDED;
+      this.pwhite.active = false;
+      this.pblack.active = false;
+    }
     await this.save();
   },
 };
