@@ -16,21 +16,12 @@ const userSchema = Schema(
       required: true,
       minLength: 8,
     },
-    name: String,
+    name: { type: String, required: true },
     email: String,
     elo: { type: Number, default: 800 },
   },
   { timestamps: true }
 );
-
-userSchema.pre("save", function () {
-  if (this.email) {
-    this.name = this.email.split("@")[0];
-  } else {
-    this.name = `Anonymous_${this.uid.slice(0, 8)}`;
-  }
-  this._id = this.uid;
-});
 
 const messageSchema = Schema(
   {

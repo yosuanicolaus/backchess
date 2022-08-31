@@ -3,6 +3,12 @@ const Chat = require("./models/Chat");
 const Game = require("./models/Game");
 const Message = require("./models/Message");
 
+const {
+  uniqueNamesGenerator,
+  adjectives,
+  animals,
+} = require("unique-names-generator");
+
 const { customAlphabet } = require("nanoid");
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -21,6 +27,16 @@ module.exports = {
 
   generateID: function () {
     return nanoid();
+  },
+
+  generateName: function () {
+    let name = uniqueNamesGenerator({
+      dictionaries: [adjectives, animals],
+      style: "capital",
+      separator: "",
+    });
+    name += Math.floor(Math.random() * 99).toString();
+    return name;
   },
 
   getUser: async function (uid) {

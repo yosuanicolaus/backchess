@@ -1,4 +1,4 @@
-const { handleError, getUser } = require("../utils");
+const { handleError, getUser, generateName } = require("../utils");
 const User = require("../models/User");
 const express = require("express");
 const router = express.Router();
@@ -13,7 +13,8 @@ router.post("/new", async (req, res) => {
   const { uid } = req.body;
 
   try {
-    const user = new User({ uid });
+    const name = generateName();
+    const user = new User({ uid, name, _id: uid });
     await user.save();
     res.json(user);
   } catch (error) {
