@@ -26,6 +26,16 @@ function createPgn(history) {
   return pgn;
 }
 
+/**
+ * @param {number[]} records
+ * @return {number}
+ */
+function getLastRecordsDiff(records) {
+  const len = records.length;
+  const diff = records[len - 1] - records[len - 2];
+  return diff;
+}
+
 module.exports = {
   joinUser: async function (user) {
     if (this.user0?.uid === user.uid || this.user1?.uid === user.uid) return;
@@ -115,6 +125,10 @@ module.exports = {
     }
     this.pwhite.active = true;
     this.pblack.active = false;
+
+    const tcMinutes = Number(this.timeControl.split("+")[0]);
+    this.pwhite.time = tcMinutes * 60_000;
+    this.pblack.time = tcMinutes * 60_000;
     await this.save();
   },
 
@@ -128,9 +142,17 @@ module.exports = {
     this.board = board;
     this.moves = moves;
     this.history.push(lastMoveSan);
+    this.records.push(Date.now());
     this.pgn = createPgn(this.history);
     this.pwhite.active = this.turn === "w";
     this.pblack.active = this.turn === "b";
+
+    if (this.records.length > 2) {
+      const player = this.turn === "w" ? this.pblack : this.pwhite;
+      const inc = Number(this.timeControl.split("+")[1]) * 1000;
+      player.time += inc;
+      player.time -= getLastRecordsDiff(this.records);
+    }
 
     if (status === STATUS.END) {
       this.state = STATE.ENDED;

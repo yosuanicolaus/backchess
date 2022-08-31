@@ -52,9 +52,7 @@ const playerSchema = Schema({
   uid: { type: String, required: true },
   active: { type: Boolean, required: true },
   online: { type: Boolean, default: true },
-  // TODO: implement player's timer
-  // time: { type: Number, required: true },
-  // record: [Date]
+  time: Number,
 });
 
 const gameSchema = Schema(
@@ -68,6 +66,7 @@ const gameSchema = Schema(
     board: [[String]],
     moves: Array,
     history: [String],
+    records: [Number],
     pgn: String,
     pwhite: playerSchema,
     pblack: playerSchema,
