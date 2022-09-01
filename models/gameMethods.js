@@ -129,6 +129,7 @@ module.exports = {
     const tcMinutes = Number(this.timeControl.split("+")[0]);
     this.pwhite.time = tcMinutes * 60_000;
     this.pblack.time = tcMinutes * 60_000;
+    this.records.push(Date.now());
     await this.save();
   },
 
@@ -147,12 +148,10 @@ module.exports = {
     this.pwhite.active = this.turn === "w";
     this.pblack.active = this.turn === "b";
 
-    if (this.records.length > 2) {
-      const player = this.turn === "w" ? this.pblack : this.pwhite;
-      const inc = Number(this.timeControl.split("+")[1]) * 1000;
-      player.time += inc;
-      player.time -= getLastRecordsDiff(this.records);
-    }
+    const player = this.turn === "w" ? this.pblack : this.pwhite;
+    const inc = Number(this.timeControl.split("+")[1]) * 1000;
+    player.time += inc;
+    player.time -= getLastRecordsDiff(this.records);
 
     if (status === STATUS.END) {
       this.state = STATE.ENDED;
