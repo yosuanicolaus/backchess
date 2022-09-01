@@ -28,6 +28,17 @@ router.post("/new", async (req, res) => {
   }
 });
 
+router.get("/open", async (req, res) => {
+  const query = { state: "waiting" };
+
+  try {
+    const games = await Game.find(query).limit(10);
+    res.json(games);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 

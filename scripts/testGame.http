@@ -16,6 +16,9 @@ content-type: application/json
 ### get game info with ID
 GET {{host}}/game/{{gameID}}/ HTTP/1.1
 
+### get <=10 joinable games
+GET {{host}}/game/open/ HTTP/1.1
+
 ### get random joinable game
 GET {{host}}/game/random/open/ HTTP/1.1
 
