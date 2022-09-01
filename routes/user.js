@@ -34,4 +34,18 @@ router.get("/:uid", async (req, res) => {
   }
 });
 
+// get user by name
+router.get("/name/:name", async (req, res) => {
+  const { name } = req.params;
+
+  try {
+    const user = await User.find({ name });
+    if (user.length === 0) throw "404/user not found";
+    if (user.length > 1) throw "500/found more than 1 user";
+    res.json(user);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
 module.exports = router;
