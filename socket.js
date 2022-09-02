@@ -1,3 +1,4 @@
+const Game = require("./models/Game");
 const {
   getGame,
   getUser,
@@ -23,11 +24,23 @@ io.on("connection", (socket) => {
     console.log(`setup ${name} with uid ${uid}`);
   });
 
+  const updateLobby = async (uid) => {
+    const targetID = uid ? uid : "lobby";
+    try {
+      const openGameQuery = { state: "waiting" };
+      const games = await Game.find(openGameQuery).limit(10);
+      io.to(targetID).emit("update-lobby", games);
+    } catch (error) {
+      emitLog(targetID, error);
+    }
+  };
+
   const joinGame = async (id, uid) => {
     try {
       const game = await getGame(id);
       const user = await getUser(uid);
       await game.joinUser(user);
+      if (game.state === "waiting") updateLobby();
       io.to(id).emit("log", `${socket.name} joined the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
@@ -40,6 +53,7 @@ io.on("connection", (socket) => {
     try {
       const game = await getGame(id);
       await game.leaveUid(uid);
+      if (game.state === "waiting" || game.state === "empty") updateLobby();
       io.to(id).emit("log", `${socket.name} left the room`);
       io.to(id).emit("update-game", game);
     } catch (error) {
@@ -105,6 +119,15 @@ io.on("connection", (socket) => {
 
   socket.on("leave", ({ id }) => {
     socket.leave(id);
+  });
+
+  socket.on("join-lobby", () => {
+    socket.join("lobby");
+    updateLobby(socket.uid);
+  });
+
+  socket.on("leave-lobby", () => {
+    socket.leave("lobby");
   });
 
   socket.on("join-game", ({ id }) => {
