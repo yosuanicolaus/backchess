@@ -99,7 +99,7 @@ io.on("connection", (socket) => {
       checkValidPlayer(uid, game);
       const chess = new Chess(move.fenResult);
       await game.updateChessData(chess.data, move.san);
-      io.to(id).emit("update-game", game);
+      io.to(id).emit("update-game", game, move);
     } catch (error) {
       emitLog(id, error);
     }
