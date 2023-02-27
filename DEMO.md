@@ -1,10 +1,15 @@
 # How to Use
 
-This section explains how to use in more details.
+This section explains how to use Backchess in more details.
+The [API section](#api) handles the games, users, and chats CRUD operations.
+The [Socket Server](#socket-server) section handles the actual game play like making a move on the game.
+
+## API
+
 For reference, check out [My Frontend Version](https://github.com/yosuanicolaus/frontchess) of this project.
 You can also view this as a http file from /scripts/demo.http
 
-```http
+```python
 @host = https://desolate-caverns-62809.herokuapp.com
 
 ### get ALL DATA (just for general overview)
@@ -130,3 +135,7 @@ content-type: application/json
 }
 
 ```
+
+## Socket Server
+
+(to be documented...)
