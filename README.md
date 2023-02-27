@@ -93,9 +93,17 @@ https://desolate-caverns-62809.herokuapp.com/game/AO3NWGqmKz
 }
 ```
 
+## Tech Stack
+
+- Node JS
+- Express
+- Mongoose
+- MongoDB
+- Socket io
+
 ## Installation
 
-To use Backchess, simply visit the website and start interacting with the API. No installation is necessary.
+To use Backchess, simply start interacting with the API with a GET/POST requests. No installation is necessary.
 
 ## Usage
 
