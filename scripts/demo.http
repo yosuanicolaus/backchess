@@ -1,0 +1,123 @@
+@host = https://desolate-caverns-62809.herokuapp.com
+
+### get ALL DATA (just for general overview)
+GET {{host}}/ HTTP/1.1
+
+# the api is divided into 3 routes:
+# /game/ contains information about game
+# /user/ contains information about user
+# /chat/ contains information about chat
+
+### create new game
+POST {{host}}/game/new/ HTTP/1.1
+content-type: application/json
+
+{
+    "timeControl": "3+3"
+}
+
+# returns gameID of a new empty game, example:
+###
+@gameID = JUEVMC5jxP
+
+### get game info with ID
+GET {{host}}/game/{{gameID}}/ HTTP/1.1
+
+### get <=10 joinable games
+GET {{host}}/game/open/ HTTP/1.1
+
+### get random joinable game
+GET {{host}}/game/random/open/ HTTP/1.1
+
+### create new user with a desired uid
+POST {{host}}/user/new HTTP/1.1
+content-type: application/json
+
+{
+    "uid": "testUid1"
+}
+
+# returns a User object
+### example uid
+@uid = "testUid1"
+
+### get user by uid
+GET {{host}}/user/{{uid}} HTTP/1.1
+
+### example name
+@name = "MaleMuskox50"
+### get user by name
+GET {{host}}/user/name/{{name}} HTTP/1.1
+
+
+# from here on the "uid" in the json body
+# must be a valid uid generated from /user/new as shown
+### join game
+POST {{host}}/game/{{gameID}}/join HTTP/1.1
+content-type: application/json
+
+{
+    "uid": "testUid1"
+}
+
+### leave game
+# if there is a 2nd player in the game, they will
+# be the 1st player aka game owner
+POST {{host}}/game/{{gameID}}/leave HTTP/1.1
+content-type: application/json
+
+{
+    "uid": "testUid1"
+}
+
+### send a "ready" signal (only the game's 2nd user can do this)
+POST {{host}}/game/{{gameID}}/ready HTTP/1.1
+content-type: application/json
+
+{
+    // only the 2nd player in the game room can start
+    // hence the '2' instead of 1
+    "uid": "testUid2"
+}
+
+### start game (only the game owner can start the game)
+POST {{host}}/game/{{gameID}}/start HTTP/1.1
+content-type: application/json
+
+{
+    "uid": "testUid1"
+}
+
+### /chat/ demo
+# example demo ID for message and chat
+@demoMessageID = 62fdad79931832efcfaa7bd7
+@demoChatID = 63fbf8f77f179e7c63001825
+
+### create new message
+POST {{host}}/chat/message/new HTTP/1.1
+content-type: application/json
+
+{
+    "text": "Hello, world!",
+    "username": "goodGuy11",
+    "uid": "anotherUserID"
+}
+
+### get message by message id
+GET {{host}}/chat/message/{{demoMessageID}} HTTP/1.1
+
+### create new chat room
+POST {{host}}/chat/new HTTP/1.1
+
+### get chat room
+GET {{host}}/chat/{{demoChatID}} HTTP/1.1
+
+### post message to chat
+POST {{host}}/chat/{{demoChatID}}/new-message HTTP/1.1
+content-type: application/json
+
+{
+    "text": "Bye World!",
+    "username": "goodGuy12",
+    "uid": "qoiwryuescvnb214"
+}
